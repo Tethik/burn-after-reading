@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
 <form ng-controller="CreateCtl">
-  <div id="step1" ng-show="step == 1">
-    {% raw %}
-    <div ng-show="status" class="msg {{status}}">
-      {{reason}}
-    </div>
-    {% endraw %}
+  {% raw %}
+  <div ng-show="status" class="msg {{status}}">
+    {{reason}}
+  </div>
+  {% endraw %}
 
+  <div id="step1" ng-show="step == 1">
     <label for="exampleMessage">Message</label>
-     <textarea class="u-full-width" placeholder="Hi Dave …" ng-model="message" required></textarea>
+     <textarea class="u-full-width" placeholder="Hi Dave …" ng-model="message" rows="6" required></textarea>
      <label>
        <input type="checkbox" ng-model="generate_password">
        <span class="label-body">Create a password for me.</span>

@@ -15,6 +15,10 @@
 
   <!--- JS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+  <!-- http://bitwiseshiftleft.github.io/sjcl/sjcl.js -->
+  <script src="/static/sjcl.js"></script>
+
   <script src="/static/angular.min.js"></script>
   <script src="/static/burn.js"></script>
 </head>
@@ -26,10 +30,9 @@
     </a>
   </header>
   <div id="content">
-  {% block body %}
+    {% block body %}
 
-  {% endblock %}
-
+    {% endblock %}
     <footer>
       <a href="/about">about</a>
       <a href="https://github.com/Tethik/burn-after-reading">github</a>

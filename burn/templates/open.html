@@ -1,14 +1,18 @@
 {% extends "layout.html" %}
 {% block body %}
 <form ng-controller="OpenCtl">
-  <label for="exampleMessage">Message</label>
-   <textarea class="u-full-width" readonly>{{msg}}</textarea>
+  <label for="message">Message</label>
+   <input type="hidden" id="themessage" value="{{msg}}">
+   {% raw %}
+   <textarea class="u-full-width" name="message" rows="6" readonly>{{decrypted}}</textarea>
+   {% endraw %}
 
-   <div>
+   <p>The message has been deleted from the server.</p>
+   <!-- <div>
      <label for="password">
        Password
      </label>
      <input type="text" name="password" placeholder="password">
-   </div>
+   </div> -->
 </form>
 {% endblock %}
