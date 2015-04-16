@@ -4,14 +4,17 @@
 messages secretly. For example passwords and other sensitive data. I needed such
 a service when resetting my Mom's email password. </p>
 
+<p><b>Please note that this is mostly a proof of concept!</b></p>
+
 <h4>Basic Idea</h4>
 
+<p>Send the encryption key in the url hash.</p>
+
 <p>
-It works by encrypting the message in javascript using AES using a randomly
-generated password stretched by scrypt. The message is then stored in memory on
-the server which creates a uuid as a reference. The client side script creates a
+It works by encrypting the message in javascript using symmetric encryption. For this I use <a href="https://bitwiseshiftleft.github.io/sjcl/">SJCL</a>.
+The message is then stored in memory on the server which creates a uuid as a reference. The client side script creates a
 special url for you where the key is stored in the anchor part, which is by
-default not sent to the server by the browser.
+default not sent to the server by the browser. So the server never sees the encryption key.
 </p>
 
 <label for="example">Example url:</label>

@@ -1,17 +1,22 @@
-
+from queue import Queue
 
 class MemoryStorage(object):
-    storage = dict()
+    def __init__(self, capacity):
+        self.queue = Queue(capacity)
+        self.storage = dict()
 
     def get(self, key):
-        print(self.storage)
         return self.storage.get(key)
 
     def put(self, key, value):
+        if self.queue.full():
+            todel = self.queue.get()
+            del self.storage[todel]
         self.storage[key] = value
+        self.queue.put(key)
 
-    def cleanup():
+    def cleanup(self):
         pass
 
-    def length():
+    def length(self):
         return len(self.storage)

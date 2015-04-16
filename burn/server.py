@@ -3,9 +3,10 @@ from burn.storage import MemoryStorage
 import uuid
 
 app = Flask(__name__)
-storage = MemoryStorage()
+MAX_MESSAGE_LENGTH = 1000
+storage = MemoryStorage(500)
 
-MAX_MESSAGE_LENGTH = 500
+
 
 @app.route("/")
 def index():
@@ -25,11 +26,18 @@ def create():
 @app.route("/<token>")
 def fetch(token):
     global storage
-    msg = storage.get(uuid.UUID(token))
-    if not msg:
+    try:
+        msg = storage.get(uuid.UUID(token))
+        if not msg:
+            return abort(404)
+        return render_template("open.html", msg=msg)
+    except:
         return abort(404)
-    return render_template("open.html", msg=msg)
 
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html")

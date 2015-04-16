@@ -12,7 +12,7 @@ module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
 
   var step2 = function(storage_key, encryption_key) {
     feedback("info", "Done!");
-    $scope.share_url = "http://localhost:5000/"+storage_key+"#"+encodeURIComponent(encryption_key);
+    $scope.share_url = document.location+storage_key+"#"+encodeURIComponent(encryption_key);
     $scope.step = 2;
   };
 
