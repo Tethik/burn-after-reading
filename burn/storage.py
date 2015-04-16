@@ -4,6 +4,7 @@ class MemoryStorage(object):
     storage = dict()
 
     def get(self, key):
+        print(self.storage)
         return self.storage.get(key)
 
     def put(self, key, value):
@@ -11,3 +12,6 @@ class MemoryStorage(object):
 
     def cleanup():
         pass
+
+    def length():
+        return len(self.storage)

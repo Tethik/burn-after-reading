@@ -1,20 +1,38 @@
 {% extends "layout.html" %}
 {% block body %}
-<form>
-  <label for="exampleMessage">Message</label>
-   <textarea class="u-full-width" placeholder="Hi Dave …" id="exampleMessage"></textarea>
-   <label>
-     <input type="checkbox" checked="checked">
-     <span class="label-body">Create a password for me.</span>
-   </label>
+<form ng-controller="CreateCtl">
+  <div id="step1" ng-show="step == 1">
+    {% raw %}
+    <div ng-show="status" class="msg {{status}}">
+      {{reason}}
+    </div>
+    {% endraw %}
 
-   <div>
-     <label for="password">
-       Password
+    <label for="exampleMessage">Message</label>
+     <textarea class="u-full-width" placeholder="Hi Dave …" ng-model="message" required></textarea>
+     <label>
+       <input type="checkbox" ng-model="generate_password">
+       <span class="label-body">Create a password for me.</span>
      </label>
-     <input type="text" name="password" placeholder="correcthorsebatterystaple" class="u-full-width">
-   </div>
 
-   <input class="button-primary" value="Submit" type="submit">
+     <div ng-show="!generate_password">
+       <label for="password">
+         Password
+       </label>
+       <p>This password will be used to encrypt the message.</p>
+       <input type="text" name="password" placeholder="correcthorsebatterystaple" ng-model="user_password" class="u-full-width">
+     </div>
+
+     <input class="button-primary" value="Submit" type="submit" ng-click="send(message)">
+  </div>
+
+   <div id="step2" ng-show="step == 2">
+     <p>Your message has been stored. Here is the url you can share:</p>
+
+     <label for="url">
+       Share url:
+     </label>
+     <input type="text" name="url" ng-model="share_url" class="u-full-width" readonly>
+   </div>
 </form>
 {% endblock %}

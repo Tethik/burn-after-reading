@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
-<form>
+<form ng-controller="OpenCtl">
   <label for="exampleMessage">Message</label>
-   <textarea class="u-full-width" placeholder="Hi Dave …" id="exampleMessage"></textarea>
-   
+   <textarea class="u-full-width" readonly>{{msg}}</textarea>
+
    <div>
      <label for="password">
        Password

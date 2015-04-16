@@ -21,3 +21,16 @@ footer {
     box-shadow: 4px 4px #95A5A6;
     margin-bottom: 50px;
 }
+
+.msg {
+   background-color: #4183D7;
+   border-radius: 5px;
+   padding: 5px;
+   /*animation: flash 0.5s;*/
+   margin-bottom: 15px;
+   padding-left: 10px;
+}
+
+.error {
+  background-color: #c75c5c;
+}
