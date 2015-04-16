@@ -1,4 +1,4 @@
-from queue import Queue
+from Queue import Queue
 
 class MemoryStorage(object):
     def __init__(self, capacity):
