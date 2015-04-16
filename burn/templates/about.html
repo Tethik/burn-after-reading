@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+<p>This service is intended to be used as a way of sharing one-time
+messages secretly. For example passwords and other sensitive data. I needed such
+a service when resetting my Mom's email password. </p>
+
+<h4>Basic Idea</h4>
+
+<p>
+It works by encrypting the message in javascript using AES using a randomly
+generated password stretched by scrypt. The message is then stored in memory on
+the server which creates a uuid as a reference. The client side script creates a
+special url for you where the key is stored in the anchor part, which is by
+default not sent to the server by the browser.
+</p>
+
+<label for="example">Example url:</label>
+<input type="text" name="example" disabled="disabled" value="http://domain.tld/[uuid]#encryptionkey" class="u-full-width" />
+
+<p>
+Upon receieving the request, the server returns the data referenced by the uuid.
+The javascript takes the data and decrypts it using the encryptionkey taken from
+the anchor.
+</p>
+
+<p>All of the code is opensource and available on <a href="https://github.com/Tethik/burn-after-reading">github</a>.
+You are free to reuse as you wish under the MIT license. </p>
+
+{% endblock %}

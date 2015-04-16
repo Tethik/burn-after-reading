@@ -1,0 +1,23 @@
+body {
+  background-color: #c75c5c;
+}
+
+header {
+  text-align: center;
+}
+
+footer {
+  text-align: right;
+}
+
+#main {
+  margin-top: 35px;
+}
+
+#content {
+    padding: 40px;
+    border: 1px solid #95A5A6;
+    background-color: #ECECEC;
+    box-shadow: 4px 4px #95A5A6;
+    margin-bottom: 50px;
+}
