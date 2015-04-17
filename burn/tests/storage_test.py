@@ -5,24 +5,27 @@ class TestMemoryStorage(TestCase):
 
     def test_put(self):
         store = MemoryStorage(3)
-        store.put("hej", "asd")
+        store.clear()
+        store.put("asd")
         self.assertEqual(store.length(), 1)
 
     def test_get(self):
         store = MemoryStorage(3)
-        store.put("hej", "asd")
-        self.assertEqual(store.get("hej"), "asd")
+        store.clear()
+        key = store.put("asd")
+        self.assertEqual(store.get(key), "asd")
 
     def test_capacity(self):
         testcapacity = 50
         store = MemoryStorage(testcapacity)
+        store.clear()
+        first_key = None
         for i in range(testcapacity):
-            store.put(i, "asd"+str(i))
+            key = store.put("asd"+str(i))
+            if not first_key:
+                first_key = key
             self.assertEqual(store.length(), i+1)
 
-        for i in range(testcapacity):
-            self.assertEqual(store.get(i), "asd"+str(i))
-
-        self.assertEqual(store.get(0), "asd0")
-        store.put(testcapacity+1, "asd"+str(testcapacity+1))
-        self.assertEqual(store.get(0), None)
+        self.assertEqual(store.get(first_key), "asd0")
+        store.put("asd"+str(testcapacity+1))
+        self.assertEqual(store.get(first_key), None)

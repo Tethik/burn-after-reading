@@ -4,9 +4,6 @@ import uuid
 
 app = Flask(__name__)
 MAX_MESSAGE_LENGTH = 1000
-storage = MemoryStorage(500)
-
-
 
 @app.route("/")
 def index():
@@ -14,25 +11,24 @@ def index():
 
 @app.route("/create", methods=["POST"])
 def create():
-    global storage
+    storage = MemoryStorage(500)
     message = request.json["message"]
     if len(message) > MAX_MESSAGE_LENGTH:
         return "Message is too long. Please keep it shorter than 400 characters.", 403
 
-    id = uuid.uuid4()
-    storage.put(id, message)
+    id = storage.put(message)
     return str(id)
 
 @app.route("/<token>")
 def fetch(token):
-    global storage
-    try:
-        msg = storage.get(uuid.UUID(token))
-        if not msg:
-            return abort(404)
-        return render_template("open.html", msg=msg)
-    except:
+    storage = MemoryStorage(500)
+    # try:
+    msg = storage.get(uuid.UUID(token))
+    if not msg:
         return abort(404)
+    return render_template("open.html", msg=msg)
+    # except:
+    #     return abort(404)
 
 @app.route("/about")
 def about():
