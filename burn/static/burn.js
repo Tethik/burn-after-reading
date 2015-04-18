@@ -17,6 +17,10 @@ module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
   };
 
   $scope.send = function(message) {
+    if(!message || message.length == 0) {
+      return feedback("info", "Type something!");      
+    }
+
     console.log(message);
     var password = $scope.user_password;
     if(!password || password == "" || password.length == 0) {

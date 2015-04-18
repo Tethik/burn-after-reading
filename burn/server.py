@@ -3,7 +3,7 @@ from burn.storage import MemoryStorage
 import uuid
 
 app = Flask(__name__)
-MAX_MESSAGE_LENGTH = 1000
+MAX_MESSAGE_LENGTH = 2048
 
 @app.route("/")
 def index():
