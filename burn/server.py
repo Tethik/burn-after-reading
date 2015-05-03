@@ -31,9 +31,11 @@ def fetch(token):
         storage.delete(u)
         return "ok"
 
-    msg, expiry = storage.get(u)
-    if not msg:
+    ret = storage.get(u)
+
+    if not ret:
         return abort(404)
+    msg, expiry = ret
     return render_template("open.html", msg=msg, expiry=expiry)
 
 @app.route("/about")
