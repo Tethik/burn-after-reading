@@ -44,12 +44,13 @@ class TestMemoryStorage(TestCase):
     def test_expiry(self):
         store = MemoryStorage(3)
         store.clear()
-        now = datetime.datetime.now() + datetime.timedelta(0,3)
+        now = datetime.datetime.utcnow() + datetime.timedelta(0,3)
         id = store.put("asd", now)
         self.assertEqual(store.length(), 1)
-        store.expire()
-        self.assertEqual(store.length(), 1)
-        self.assertNotEqual(store.get(id), None)
+        for _ in range(100):
+            store.expire()
+            self.assertEqual(store.length(), 1)
+            self.assertNotEqual(store.get(id), None)
         sleep(3)
         store.expire()
         self.assertEqual(store.length(), 0)

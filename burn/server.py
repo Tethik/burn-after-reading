@@ -15,7 +15,7 @@ def create():
     storage = MemoryStorage(500)
     message = request.json["message"]
     print(request.json["expiry"])
-    expiry = datetime.fromtimestamp(request.json["expiry"] / 1000)
+    expiry = datetime.utcfromtimestamp(request.json["expiry"] / 1000)
     if len(message) > MAX_MESSAGE_LENGTH:
         return "Message is too long. Please keep it shorter than 400 characters.", 403
 

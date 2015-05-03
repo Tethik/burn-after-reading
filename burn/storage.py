@@ -47,4 +47,5 @@ class MemoryStorage(object):
 
     def expire(self):
         c = self.conn.cursor()
-        c.execute("DELETE FROM storage WHERE expiry < ?", (datetime.now(), ))
+        c.execute("DELETE FROM storage WHERE expiry < ?", (datetime.utcnow(), ))
+        self.conn.commit()
