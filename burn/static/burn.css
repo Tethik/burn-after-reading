@@ -39,3 +39,7 @@ footer {
   background-color: #C75C5C;
   color: #f5cf87;
 }
+
+.right-align {
+  text-align: right;
+}

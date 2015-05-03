@@ -10,10 +10,24 @@
   <div id="step1" ng-show="step == 1">
     <label for="exampleMessage">Message</label>
      <textarea class="u-full-width" placeholder="Hi Dave …" ng-model="message" rows="6" required></textarea>
-     <label>
-       <input type="checkbox" ng-model="generate_password">
-       <span class="label-body">Create a password for me.</span>
-     </label>
+
+     <div class="row">
+       <div class="one-half column">
+         <label>
+           <input type="checkbox" ng-model="generate_password">
+           <span class="label-body">Create a password for me.</span>
+         </label>
+       </div>
+
+       <div class="one-half column right-align">
+           <span class="label-body">Expire in:</span>
+           <select name="expiry" ng-model="expiry">
+             <option value="hour" selected>One hour</option>
+             <option value="day">One day</option>
+             <option value="week">One week</option>
+           </select>
+       </div>
+     </div>
 
      <div ng-show="!generate_password">
        <label for="password">

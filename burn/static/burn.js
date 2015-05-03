@@ -3,6 +3,7 @@ var module = angular.module('burn', []);
 module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
   $scope.generate_password = true;
   $scope.step = 1;
+  $scope.expiry = "hour";
 
   var feedback = function(status, reason) {
     console.log(reason);
@@ -30,13 +31,22 @@ module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
 
     console.log(password);
 
+    var expiry_time = Date.now();
+    if($scope.expiry == "hour") {
+      expiry_time += 1000*60*60;
+    } else if($scope.expiry == "day") {
+      expiry_time += 1000*60*60*24;
+    } else if($scope.expiry == "week") {
+      expiry_time += 1000*60*60*24*7;
+    }
+
     feedback("info", "encrypting...");
     message = sjcl.encrypt(password, message);
     message = btoa(JSON.stringify(message));
 
     feedback("info", "sending to server...");
 
-    $http.post("/create", {message: message})
+    $http.post("/create", {message: message, expiry: expiry_time})
     .success(function(data) {
       step2(data, password);
     })
