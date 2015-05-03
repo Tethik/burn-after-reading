@@ -72,11 +72,21 @@ module.controller("OpenCtl", ['$scope', '$http', function($scope, $http) {
   console.log(id);
   console.log(password);
 
+  var fixed = document.getElementById("expiry").value.replace(" ","T");
+  var date = new Date(fixed);
+  var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+  var offset = date.getTimezoneOffset() / 60;
+  var hours = date.getHours();
+  newDate.setHours(hours - offset);
+
+  $scope.expiry = newDate.toLocaleString();
+
   var message = document.getElementById("themessage").value;
   console.log(message);
   var debased = atob(message);
   message = JSON.parse(debased);
   $scope.decrypted = sjcl.decrypt(password, message);
+
 
   $scope.burn = function() {
     feedback("info", "Telling server to delete the message...");

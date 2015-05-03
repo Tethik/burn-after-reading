@@ -15,10 +15,8 @@ class MemoryStorage(object):
 
     def get(self, key):
         c = self.conn.cursor()
-        c.execute("SELECT value FROM storage WHERE key = ?", (str(key),))
+        c.execute("SELECT value, expiry FROM storage WHERE key = ?", (str(key),))
         res = c.fetchone()
-        if res:
-            return res[0]
         return res
 
     def put(self, value, expiry):
