@@ -29,3 +29,12 @@ class TestMemoryStorage(TestCase):
         self.assertEqual(store.get(first_key), "asd0")
         store.put("asd"+str(testcapacity+1))
         self.assertEqual(store.get(first_key), None)
+
+    def test_delete(self):
+        store = MemoryStorage(3)
+        store.clear()
+        id = store.put("asd")
+        self.assertEqual(store.length(), 1)
+        store.delete(id)
+        self.assertEqual(store.length(), 0)
+        self.assertEqual(store.get(id), None)

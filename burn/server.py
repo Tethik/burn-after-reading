@@ -19,16 +19,21 @@ def create():
     id = storage.put(message)
     return str(id)
 
-@app.route("/<token>")
+@app.route("/<token>", methods=["GET","DELETE"])
 def fetch(token):
     storage = MemoryStorage(500)
-    # try:
-    msg = storage.get(uuid.UUID(token))
+    u = uuid.UUID(token)
+
+    if request.method == "DELETE":
+        storage.delete(u)
+        return "ok"
+
+    msg = storage.get(u)
     if not msg:
         return abort(404)
     return render_template("open.html", msg=msg)
-    # except:
-    #     return abort(404)
+
+
 
 @app.route("/about")
 def about():

@@ -10,7 +10,6 @@ class MemoryStorage(object):
         c.execute("create table if not exists storage (key NVARCHAR(100) PRIMARY KEY, value TEXT, created DATE)")
         self.conn.commit()
 
-
     def get(self, key):
         c = self.conn.cursor()
         c.execute("SELECT value FROM storage WHERE key = ?", (str(key),))
@@ -27,6 +26,11 @@ class MemoryStorage(object):
         c.execute("INSERT INTO storage (key, value, created) VALUES (?, ?, ?)", (str(key),value,datetime.now()))
         self.conn.commit()
         return key
+
+    def delete(self, key):
+        c = self.conn.cursor()
+        c.execute("DELETE FROM storage WHERE key = ?", (str(key),))
+        self.conn.commit()
 
     def clear(self):
         c = self.conn.cursor()

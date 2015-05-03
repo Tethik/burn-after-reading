@@ -34,3 +34,8 @@ footer {
 .error {
   background-color: #c75c5c;
 }
+
+.button-burn {
+  background-color: #C75C5C;
+  color: #f5cf87;
+}

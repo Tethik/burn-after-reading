@@ -18,7 +18,7 @@ module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
 
   $scope.send = function(message) {
     if(!message || message.length == 0) {
-      return feedback("info", "Type something!");      
+      return feedback("info", "Type something!");
     }
 
     console.log(message);
@@ -46,13 +46,36 @@ module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
   };
 }]);
 
-module.controller("OpenCtl", ['$scope', function($scope) {
+module.controller("OpenCtl", ['$scope', '$http', function($scope, $http) {
+
+  var feedback = function(status, reason) {
+    console.log(reason);
+    $scope.status = status;
+    $scope.reason = reason;
+  };
+
+  var id = decodeURIComponent(document.location.pathname);
   var password = decodeURIComponent(document.location.hash);
+  id = id.substr(1, id.length-1);
   password = password.substr(1, password.length-1);
+
+  console.log(id);
   console.log(password);
+
   var message = document.getElementById("themessage").value;
   console.log(message);
   var debased = atob(message);
   message = JSON.parse(debased);
   $scope.decrypted = sjcl.decrypt(password, message);
+
+  $scope.burn = function() {
+    feedback("info", "Telling server to delete the message...");
+    $http.delete("/"+id)
+    .success(function() {
+      feedback("info", "The message was deleted.")
+    })
+    .error(function(data) {
+      feedback("error", data);
+    });
+  };
 }]);
