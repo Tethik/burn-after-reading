@@ -2,7 +2,7 @@
 A service to share short term messages stored in memory. Using client side
 crypto where the key is shared via the url hash.
 
-# Requirements
+## Requirements
 Python version: 2.7
 
 Install requirements found in requirements.txt via
