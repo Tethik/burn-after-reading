@@ -2,7 +2,7 @@
 A service to share short term messages stored in memory. Using client side
 crypto where the key is shared via the url hash.
 
-[Demo](https://sheltered-tor-3057.herokuapp.com/)
+[Demo](http://burn-after-reading.herokuapp.com/)
 
 ## Running locally
 Python version: 2.7
@@ -12,7 +12,7 @@ Install requirements found in requirements.txt via
 pip install -r requirements.txt
 ```
 
-You can either start the server locally by running 
+You can either start the server locally by running
 ```
 python run.py
 ```
@@ -32,4 +32,3 @@ gunicorn burn.wsgi
 
 ## Todo
 * Review crypto parameters, increase bit-length of key.
-* Deploy to heroku
