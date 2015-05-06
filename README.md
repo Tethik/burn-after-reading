@@ -2,7 +2,7 @@
 A service to share short term messages stored in memory. Using client side
 crypto where the key is shared via the url hash.
 
-[Demo](http://burn-after-reading.herokuapp.com/)
+[Demo](https://burn-after-reading.herokuapp.com/)
 
 ## Running locally
 Python version: 2.7
