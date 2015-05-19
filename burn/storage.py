@@ -3,9 +3,15 @@ import uuid
 from datetime import datetime
 
 class MemoryStorage(object):
+
+    db = "/dev/shm/burn.db"
+
+    def set_capacity(self, capacity):
+        self.capacity = capacity
+
     def __init__(self, capacity):
         self.capacity = capacity
-        self.conn = sqlite3.connect("/dev/shm/burn.db")
+        self.conn = sqlite3.connect(self.db)
         c = self.conn.cursor()
         c.execute("create table if not exists storage (key NVARCHAR(100) PRIMARY KEY, value TEXT, expiry DATE, created DATE)")
         self.conn.commit()
@@ -21,7 +27,7 @@ class MemoryStorage(object):
 
     def put(self, value, expiry):
         c = self.conn.cursor()
-        if self.length() >= self.capacity:
+        if self.size() >= self.capacity:
             c.execute("DELETE FROM storage WHERE created = (SELECT MIN(created) FROM storage)")
         key = uuid.uuid4()
         c.execute("INSERT INTO storage (key, value, expiry, created) VALUES (?, ?, ?, ?)", (str(key),value, expiry, datetime.now()))
@@ -38,7 +44,7 @@ class MemoryStorage(object):
         c.execute("DELETE FROM storage")
         self.conn.commit()
 
-    def length(self):
+    def size(self):
         c = self.conn.cursor()
         c.execute("SELECT COUNT(*) FROM storage")
         return c.fetchone()[0]

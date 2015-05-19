@@ -5,7 +5,7 @@ import uuid
 
 app = Flask(__name__)
 MAX_MESSAGE_LENGTH = 2048 # No exact math done to determine this.
-MAX_STORAGE = 50000
+MAX_STORAGE = 65536
 
 @app.route("/")
 def index():
