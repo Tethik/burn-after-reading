@@ -13,7 +13,8 @@ module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
 
   var step2 = function(storage_key, encryption_key) {
     feedback("info", "Done!");
-    $scope.share_url = document.location+storage_key+"#"+encodeURIComponent(encryption_key);
+    encryption_key_hex = sjcl.codec.base64url.fromBits(encryption_key);
+    $scope.share_url = document.location+storage_key+"#"+encodeURIComponent(encryption_key_hex);
     $scope.step = 2;
   };
 
@@ -26,7 +27,7 @@ module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
     var password = $scope.user_password;
     if(!password || password == "" || password.length == 0) {
       feedback("info", "generating a password...");
-      password = sjcl.codec.hex.fromBits(sjcl.random.randomWords(8));
+      password = sjcl.random.randomWords(8); // 32 bits per word. 8*32 = 256 bits. 2^256 combinations.
     }
 
     console.log(password);
@@ -68,6 +69,7 @@ module.controller("OpenCtl", ['$scope', '$http', function($scope, $http) {
   var password = decodeURIComponent(document.location.hash);
   id = id.substr(1, id.length-1);
   password = password.substr(1, password.length-1);
+  password = sjcl.codec.base64url.toBits(password);
 
   console.log(id);
   console.log(password);
