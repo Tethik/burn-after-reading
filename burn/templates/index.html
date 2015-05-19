@@ -9,7 +9,7 @@
 
   <div id="step1" ng-show="step == 1">
     <label for="exampleMessage">Message</label>
-     <textarea class="u-full-width" placeholder="Hi Dave …" ng-model="message" rows="6" required></textarea>
+     <textarea class="u-full-width" placeholder="Hi Dave …" ng-model="message" rows="6" maxlength="250" required></textarea>
 
      <div class="row">
        <div class="one-half column">
@@ -41,12 +41,10 @@
   </div>
 
    <div id="step2" ng-show="step == 2">
-     <p>Your message has been stored. Here is the url you can share:</p>
-
-     <label for="url">
-       Share url:
-     </label>
-     <input type="text" name="url" ng-model="share_url" class="u-full-width" readonly>
+     <p>
+       Your message has been encrypted and stored. Here is the url you need to share the message:<br />
+       <input type="text" onclick="this.select();" name="url" ng-model="share_url" class="u-full-width" readonly>
+     </p>
    </div>
 </form>
 {% endblock %}

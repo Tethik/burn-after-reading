@@ -4,7 +4,8 @@ from datetime import datetime
 import uuid
 
 app = Flask(__name__)
-MAX_MESSAGE_LENGTH = 2048
+MAX_MESSAGE_LENGTH = 2048 # No exact math done to determine this.
+MAX_STORAGE = 50000
 
 @app.route("/")
 def index():
@@ -12,12 +13,12 @@ def index():
 
 @app.route("/create", methods=["POST"])
 def create():
-    storage = MemoryStorage(500)
+    storage = MemoryStorage(MAX_STORAGE)
     message = request.json["message"]
     print(request.json["expiry"])
     expiry = datetime.utcfromtimestamp(request.json["expiry"] / 1000)
     if len(message) > MAX_MESSAGE_LENGTH:
-        return "Message is too long. Please keep it shorter than 400 characters.", 403
+        return "Message is too long. Please keep it shorter than 250 characters.", 403
 
     id = storage.put(message, expiry)
     return str(id)

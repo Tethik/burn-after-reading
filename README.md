@@ -32,3 +32,6 @@ gunicorn burn.wsgi
 
 ## Todo
 * Review crypto parameters, increase bit-length of key.
+* Make password-input for urls without passwords.
+* Encrypt sqlite database to prevent other processes from tampering.
+* Warning when not HTTPS.
