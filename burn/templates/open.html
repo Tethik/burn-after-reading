@@ -12,7 +12,7 @@
    <input type="hidden" id="themessage" value="{{msg|e}}">
    <input type="hidden" id="expiry" value="{{expiry}}">
    {% raw %}
-   <textarea class="u-full-width" name="message" rows="6" readonly>{{decrypted}}</textarea>
+   <textarea class="u-full-width" id="thebox" name="message" rows="6" readonly>{{decrypted}}</textarea>
 
    <p>Once you've read the message, press "burn" to delete it from the server. It will expire automatically {{expiry}}</p>
 

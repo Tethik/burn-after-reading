@@ -5,11 +5,11 @@
   <div ng-show="status" class="msg {{status}}">
     {{reason}}
   </div>
-  {% endraw %}
+
 
   <div id="step1" ng-show="step == 1">
-    <label for="exampleMessage">Message</label>
-     <textarea class="u-full-width" placeholder="Hi Dave …" ng-model="message" rows="6" maxlength="250" required></textarea>
+    <label for="exampleMessage">Message ({{500 - message.length}} characters left)</label>
+     <textarea class="u-full-width" id="thebox" placeholder="Hi Dave …" ng-model="message" maxlength="500" required></textarea>
 
      <div class="row">
        <div class="one-half column">
@@ -46,5 +46,6 @@
        <input type="text" onclick="this.select();" name="url" ng-model="share_url" class="u-full-width" readonly>
      </p>
    </div>
+   {% endraw %}
 </form>
 {% endblock %}
