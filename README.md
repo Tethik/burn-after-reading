@@ -32,6 +32,8 @@ gunicorn burn.wsgi
 
 ## Todo
 * Review crypto parameters, increase bit-length of key.
-* Make password-input for urls without passwords.
+* Error message when wrong/missing key.
+* Make password-input for urls without passwords. 
 * Encrypt sqlite database to prevent other processes from tampering.
 * Warning when not HTTPS.
+* Robots.txt, perhaps try to prevent google from indexing further by blocking agents. More advanced: non-human behaviour?
