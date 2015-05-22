@@ -121,6 +121,7 @@ module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $
     $http.delete("/"+id)
     .success(function() {
       feedback("info", "The message was deleted.")
+      $scope.burned = true;
     })
     .error(function(data) {
       feedback("error", data);

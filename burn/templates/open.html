@@ -16,10 +16,11 @@
       {% raw %}
       <textarea class="u-full-width" id="thebox" name="message" rows="6" readonly>{{decrypted}}</textarea>
 
-      <p>Once you've read the message, press "burn" to delete it from the server. It will expire automatically {{expiry}}</p>
-
+      <div ng-hide="burned">
+        <p>Once you've read the message, press "burn" to delete it from the server. It will expire automatically {{expiry}}</p>
+        <button class="button-burn" ng-click="burn()">burn</button>
+      </div>
       {% endraw %}
-      <button class="button-burn" ng-click="burn()">burn</button>
     </div>
 
     <div ng-hide="decrypted_succesfully" ng-hide="status">

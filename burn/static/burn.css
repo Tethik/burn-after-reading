@@ -43,6 +43,10 @@ footer {
    padding-left: 10px;
 }
 
+.warning {
+  background-color: #c75c5c;
+}
+
 .error {
   background-color: #c75c5c;
 }
