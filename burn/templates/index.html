@@ -2,7 +2,7 @@
 {% block body %}
 <form ng-controller="CreateCtl">
   {% raw %}
-  <div ng-show="status" class="msg {{status}}">
+  <div id="statusbox" ng-show="status" class="msg {{status}}">
     {{reason}}
   </div>
 

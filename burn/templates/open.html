@@ -2,23 +2,32 @@
 {% block body %}
 <form ng-controller="OpenCtl">
   {% raw %}
-  <div ng-show="status" class="msg {{status}}">
+  <div id="statusbox" ng-show="status" class="msg {{status}}">
     {{reason}}
   </div>
   {% endraw %}
 
-  <div ng-hide="status">
-  <label for="message">Message</label>
-   <input type="hidden" id="themessage" value="{{msg|e}}">
-   <input type="hidden" id="expiry" value="{{expiry}}">
-   {% raw %}
-   <textarea class="u-full-width" id="thebox" name="message" rows="6" readonly>{{decrypted}}</textarea>
+  <div>
+    <label for="message">Message</label>
+    <input type="hidden" id="themessage" value="{{msg|e}}">
+    <input type="hidden" id="expiry" value="{{expiry}}">
 
-   <p>Once you've read the message, press "burn" to delete it from the server. It will expire automatically {{expiry}}</p>
+    <div ng-show="decrypted_succesfully">
+      {% raw %}
+      <textarea class="u-full-width" id="thebox" name="message" rows="6" readonly>{{decrypted}}</textarea>
 
-   {% endraw %}
-   <button class="button-burn" ng-click="burn()">burn</button>
- </div>
+      <p>Once you've read the message, press "burn" to delete it from the server. It will expire automatically {{expiry}}</p>
+
+      {% endraw %}
+      <button class="button-burn" ng-click="burn()">burn</button>
+    </div>
+
+    <div ng-hide="decrypted_succesfully" ng-hide="status">
+      <input type="text" ng-model="password" placeholder="">
+      <button ng-click="attempt_decrypt()">decrypt</button>
+    </div>
+
+  </div>
 </form>
 
 

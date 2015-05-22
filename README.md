@@ -21,6 +21,11 @@ or with gunicorn
 gunicorn burn.wsgi
 ```
 
+## Running on Heroku
+
+Running on heroku should work out of the box. Just clone the repo and push it
+to the heroku endpoint.
+
 
 ## Tech and Credits
 * [AngularJS](https://angularjs.org/)
@@ -31,7 +36,8 @@ gunicorn burn.wsgi
 * [sqllite3](https://www.sqlite.org/)
 
 ## Todo
-* Review crypto parameters, increase bit-length of key.
 * Make password-input for urls without passwords.
 * Encrypt sqlite database to prevent other processes from tampering.
 * Warning when not HTTPS.
+* Review crypto parameters further
+* Tor hidden service
