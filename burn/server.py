@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, send_from_directory
 from burn.storage import MemoryStorage
 from datetime import datetime
 import uuid
@@ -15,8 +15,6 @@ def index():
 def create():
     storage = MemoryStorage(MAX_STORAGE)
     message = request.json["message"]
-    # print(len(message))
-    # print(request.json["expiry"])
     expiry = datetime.utcfromtimestamp(request.json["expiry"] / 1000)
     if len(message) > MAX_MESSAGE_LENGTH:
         return "Message is too long. Please keep it shorter than 250 characters.", 403
@@ -47,3 +45,7 @@ def about():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html")
+
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory(app.static_folder, 'robots.txt')
