@@ -1,11 +1,7 @@
 var module = angular.module('burn', []);
 
-module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
-  $scope.generate_password = true;
-  $scope.step = 1;
-  $scope.expiry = "hour";
-
-  var feedback = function(status, reason) {
+module.factory('_feedback', [function() {
+  return function(scope, status, reason) {
     if(status.indexOf("error") > -1) {
       var el = document.getElementById("statusbox");
       el.classList.remove("flash");
@@ -14,9 +10,19 @@ module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
     }
 
     console.log(reason);
-    $scope.status = status;
-    $scope.reason = reason;
-  };
+    scope.status = status;
+    scope.reason = reason;
+  }
+}]);
+
+module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope, $http, _feedback) {
+  $scope.generate_password = true;
+  $scope.step = 1;
+  $scope.expiry = "hour";
+
+  var feedback = function(status, reason) {
+    _feedback($scope, status, reason);
+  }
 
   var step2 = function(storage_key, encryption_key) {
     feedback("info", "Done!");
@@ -70,20 +76,11 @@ module.controller("CreateCtl", ['$scope', '$http', function($scope, $http) {
   };
 }]);
 
-module.controller("OpenCtl", ['$scope', '$http', function($scope, $http) {
+module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $http, _feedback) {
 
   var feedback = function(status, reason) {
-    if(status.indexOf("error") > -1) {
-      var el = document.getElementById("statusbox");
-      el.classList.remove("flash");
-      el.offsetWidth = el.offsetWidth;
-      el.classList.add("flash");
-    }
-
-    console.log(reason);
-    $scope.status = status;
-    $scope.reason = reason;
-  };
+    _feedback($scope, status, reason);
+  }
 
   var decrypt = function(password) {
 

@@ -41,3 +41,4 @@ to the heroku endpoint.
 * Encrypt sqlite database to prevent other processes from tampering.
 * Warning when not HTTPS.
 * Robots.txt, perhaps try to prevent Google from indexing further by blocking agents. More advanced: non-human behaviour?
+* Proof-of-key to authorize burn operation.
