@@ -36,8 +36,8 @@ to the heroku endpoint.
 * [sqllite3](https://www.sqlite.org/)
 
 ## Todo
-* Make password-input for urls without passwords.
-* Encrypt sqlite database to prevent other processes from tampering.
-* Warning when not HTTPS.
 * Review crypto parameters further
 * Tor hidden service
+* Encrypt sqlite database to prevent other processes from tampering.
+* Warning when not HTTPS.
+* Robots.txt, perhaps try to prevent Google from indexing further by blocking agents. More advanced: non-human behaviour?
