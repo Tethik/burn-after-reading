@@ -3,12 +3,16 @@ from burn.storage import MemoryStorage
 import datetime
 from time import sleep
 import os
+import uuid
 
 class TestMemoryStorage(TestCase):
 
     def setUp(self):
         self.db_location = "/tmp/burn-test.db"
-        os.remove(self.db_location)
+        try:
+            os.remove(self.db_location)
+        except:
+            pass
         MemoryStorage.db = self.db_location
 
     def test_put(self):
@@ -106,3 +110,9 @@ class TestMemoryStorage(TestCase):
 
         store.delete(key)
         self.assertEqual(store.list_visitors(key), [])
+
+    def test_get_non_existent(self):
+        u = str(uuid.uuid4())
+        store = MemoryStorage(3)
+        store.clear()
+        store.get(u, "127.0.0.2")

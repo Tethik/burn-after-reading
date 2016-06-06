@@ -13,6 +13,7 @@ class MemoryStorage(object):
         self.capacity = capacity
         self.conn = sqlite3.connect(self.db)
         c = self.conn.cursor()
+        c.execute("PRAGMA foreign_keys = ON")
         c.execute("create table if not exists storage (key NVARCHAR(100) PRIMARY KEY, value TEXT, expiry DATE, created DATE)")
         c.execute("""
             create table if not exists visitors (
@@ -20,9 +21,9 @@ class MemoryStorage(object):
                 ip NVARCHAR(100),
                 visited DATE,
                 creator BIT,
-                FOREIGN KEY(storage_key) REFERENCES storage(key) ON DELETE CASCADE
+                FOREIGN KEY(storage_key) REFERENCES storage(key)
+                    ON DELETE CASCADE
             )""")
-        c.execute("PRAGMA foreign_keys = ON")
         self.conn.commit()
 
         # Expire on every new object creation => so every request.
@@ -33,7 +34,8 @@ class MemoryStorage(object):
             c.execute("""
              INSERT INTO visitors (storage_key, ip, visited, creator)
              VALUES (?, ?, ?, ?)""",
-             (str(key), ip, datetime.now(), creator))
+             (str(key), ip, datetime.utcnow(), creator))
+            self.conn.commit()
 
     def list_visitors(self, key):
         c = self.conn.cursor()
@@ -46,13 +48,17 @@ class MemoryStorage(object):
     def get(self, key, ip=None):
         c = self.conn.cursor()
 
-        self._add_visited_log(c, key, ip, 0)
-
         c.execute("""
             SELECT value, expiry FROM storage
             WHERE key = ?
             """, (str(key),))
         res = c.fetchone()
+
+        if not res:
+            return res
+
+        self._add_visited_log(c, key, ip, 0)
+
         return res
 
     def put(self, value, expiry, ip = None):

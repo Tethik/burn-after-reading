@@ -19,24 +19,30 @@ def create():
     if len(message) > MAX_MESSAGE_LENGTH:
         return "Message is too long. Please keep it shorter than 250 characters.", 403
 
-    id = storage.put(message, expiry)
+    ip = request.remote_addr
+    id = storage.put(message, expiry, ip)
     return str(id)
 
 @app.route("/<token>", methods=["GET","DELETE"])
 def fetch(token):
     storage = MemoryStorage(500)
     u = uuid.UUID(token)
+    ip = request.remote_addr
+
+    ret = storage.get(u, ip)
+
+    if not ret:
+        return abort(404)
 
     if request.method == "DELETE":
         storage.delete(u)
         return "ok"
 
-    ret = storage.get(u)
-
-    if not ret:
-        return abort(404)
+    visitors = storage.list_visitors(u)
+    unique_visitors = set([v[0] for v in visitors])
     msg, expiry = ret
-    return render_template("open.html", msg=msg, expiry=expiry)
+    return render_template("open.html", msg=msg, expiry=expiry,
+        visitors=visitors, unique_visitors=len(unique_visitors))
 
 @app.route("/about")
 def about():

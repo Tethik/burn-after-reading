@@ -1,6 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
 <form ng-controller="OpenCtl">
+  {% if unique_visitors > 2 %}
+    <div class="msg warning flash">
+      Someone else may have accessed this message before you! Check the visitor log below.
+    </div>
+  {% endif %}
   {% raw %}
   <div id="statusbox" ng-show="status" class="msg {{status}}">
     {{reason}}
@@ -28,6 +33,25 @@
       <button ng-click="attempt_decrypt()">decrypt</button>
     </div>
 
+  </div>
+
+  <div class="visitor_box">
+    <b>Visitors</b>
+    <p>{{unique_visitors}} unique IP-address{% if unique_visitors > 1 %}es have{% else %} has{% endif %} visited this page. The table below shows every visit which fetched the encrypted message. </p>
+    <table class="u-full-width">
+      <thead>
+        <tr><td>IP</td><td>Time</td><td></td></tr>
+      </thead>
+      <tbody>
+      {% for v in visitors %}
+        <tr>
+          <td>{{v[0]}}</td>
+          <td>{{v[1]}}</td>
+          <td>{% if v[2] %}author{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
   </div>
 </form>
 
