@@ -43,14 +43,13 @@
      </p>
     <table class="u-full-width">
       <thead>
-        <tr><td>{% if anonymous %}IP-hash{% else %}IP{% endif %}</td><td>Time</td><td></td></tr>
+        <tr><td>Visitor</td><td>Time</td></tr>
       </thead>
       <tbody>
       {% for v in visitors %}
         <tr>
           <td>{{v[0]}}</td>
           <td>{{v[1]}}</td>
-          <td>{% if v[2] %}author{% endif %}</td>
         </tr>
       {% endfor %}
       </tbody>

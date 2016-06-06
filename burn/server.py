@@ -41,9 +41,23 @@ def fetch(token):
 
     visitors = storage.list_visitors(u)
     unique_visitors = set([v[0] for v in visitors])
+
+    aliased_visitors = list()
+    v_counter = 1
+    alias_dictionary = dict()
+    for v in visitors:
+        ip, time, creator = v
+        if ip not in alias_dictionary:
+            if creator:
+                alias_dictionary[ip] = "Author (" + ip + ")"
+            else:
+                alias_dictionary[ip] = "Visitor " + v_counter + " (" + ip + ")"
+                v_counter += 1
+        aliased_visitors.append((alias_dictionary[ip], time))
+
     msg, expiry, anonymize_ip_salt = ret
     return render_template("open.html", msg=msg, expiry=expiry,
-        visitors=visitors, unique_visitors=len(unique_visitors), anonymous=(anonymize_ip_salt != None))
+        visitors=aliased_visitors, unique_visitors=len(unique_visitors), anonymous=(anonymize_ip_salt != None))
 
 @app.route("/about")
 def about():
