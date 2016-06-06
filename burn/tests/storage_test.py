@@ -7,7 +7,9 @@ import os
 class TestMemoryStorage(TestCase):
 
     def setUp(self):
-        MemoryStorage.db = "/dev/shm/burn-test.db"
+        self.db_location = "/tmp/burn-test.db"
+        os.remove(self.db_location)
+        MemoryStorage.db = self.db_location
 
     def test_put(self):
         store = MemoryStorage(3)
@@ -89,3 +91,18 @@ class TestMemoryStorage(TestCase):
             self.assertTrue(statinfo.st_size / 1024 / 1024 < 400)
 
         store.clear()
+
+    def test_visitor_log_delete(self):
+        store = MemoryStorage(3)
+        store.clear()
+        key = store.put("asd", datetime.datetime.utcnow() + datetime.timedelta(0,3), "127.0.0.1")
+        visitors = store.list_visitors(key)
+        self.assertEqual(visitors[0][0], "127.0.0.1")
+
+        store.get(key, "127.0.0.2")
+        visitors = store.list_visitors(key)
+        self.assertEqual(visitors[0][0], "127.0.0.1")
+        self.assertEqual(visitors[1][0], "127.0.0.2")
+
+        store.delete(key)
+        self.assertEqual(store.list_visitors(key), [])

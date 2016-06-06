@@ -14,23 +14,62 @@ class MemoryStorage(object):
         self.conn = sqlite3.connect(self.db)
         c = self.conn.cursor()
         c.execute("create table if not exists storage (key NVARCHAR(100) PRIMARY KEY, value TEXT, expiry DATE, created DATE)")
+        c.execute("""
+            create table if not exists visitors (
+                storage_key NVARCHAR(100),
+                ip NVARCHAR(100),
+                visited DATE,
+                creator BIT,
+                FOREIGN KEY(storage_key) REFERENCES storage(key) ON DELETE CASCADE
+            )""")
+        c.execute("PRAGMA foreign_keys = ON")
         self.conn.commit()
 
         # Expire on every new object creation => so every request.
         self.expire()
 
-    def get(self, key):
+    def _add_visited_log(self, c, key, ip, creator):
+        if ip != None:
+            c.execute("""
+             INSERT INTO visitors (storage_key, ip, visited, creator)
+             VALUES (?, ?, ?, ?)""",
+             (str(key), ip, datetime.now(), creator))
+
+    def list_visitors(self, key):
         c = self.conn.cursor()
-        c.execute("SELECT value, expiry FROM storage WHERE key = ?", (str(key),))
+        c.execute("""
+            SELECT ip, visited, creator FROM visitors
+            WHERE storage_key = ?
+        """, (str(key),))
+        return c.fetchall()
+
+    def get(self, key, ip=None):
+        c = self.conn.cursor()
+
+        self._add_visited_log(c, key, ip, 0)
+
+        c.execute("""
+            SELECT value, expiry FROM storage
+            WHERE key = ?
+            """, (str(key),))
         res = c.fetchone()
         return res
 
-    def put(self, value, expiry):
+    def put(self, value, expiry, ip = None):
         c = self.conn.cursor()
+        # Enforce capacity by removing the oldest entry
         if self.size() >= self.capacity:
-            c.execute("DELETE FROM storage WHERE created = (SELECT MIN(created) FROM storage)")
+            c.execute("""
+                DELETE FROM storage
+                WHERE created = (SELECT MIN(created) FROM storage)
+                """)
         key = uuid.uuid4()
-        c.execute("INSERT INTO storage (key, value, expiry, created) VALUES (?, ?, ?, ?)", (str(key),value, expiry, datetime.now()))
+        c.execute("""
+            INSERT INTO storage (key, value, expiry, created)
+            VALUES (?, ?, ?, ?)""",
+            (str(key), value, expiry, datetime.now()))
+
+        self._add_visited_log(c, key, ip, 1)
         self.conn.commit()
         return key
 
