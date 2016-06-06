@@ -13,12 +13,12 @@
   {% endraw %}
 
   <div>
-    <label for="message">Message</label>
     <input type="hidden" id="themessage" value="{{msg|e}}">
     <input type="hidden" id="expiry" value="{{expiry}}">
 
     <div ng-show="decrypted_succesfully">
       {% raw %}
+      <label for="message">Message</label>
       <textarea class="u-full-width" id="thebox" name="message" rows="6" readonly>{{decrypted}}</textarea>
 
       <div ng-hide="burned">
@@ -29,7 +29,8 @@
     </div>
 
     <div ng-hide="decrypted_succesfully" ng-hide="status">
-      <input type="text" ng-model="password" placeholder="">
+      <label for="password">Password</label>
+      <input type="text" ng-model="password" placeholder="" name="password">
       <button ng-click="attempt_decrypt()">decrypt</button>
     </div>
 
