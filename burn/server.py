@@ -57,7 +57,8 @@ def fetch(token):
 
     msg, expiry, anonymize_ip_salt = ret
     return render_template("open.html", msg=msg, expiry=expiry,
-        visitors=aliased_visitors, unique_visitors=len(unique_visitors), anonymous=(anonymize_ip_salt != None))
+        visitors=aliased_visitors, unique_visitors=len(unique_visitors),
+        anonymous=(anonymize_ip_salt != None))
 
 @app.route("/about")
 def about():
