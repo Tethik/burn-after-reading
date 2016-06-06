@@ -51,7 +51,7 @@ def fetch(token):
             if creator:
                 alias_dictionary[ip] = "Author (" + ip + ")"
             else:
-                alias_dictionary[ip] = "Visitor " + v_counter + " (" + ip + ")"
+                alias_dictionary[ip] = "Visitor " + str(v_counter) + " (" + ip + ")"
                 v_counter += 1
         aliased_visitors.append((alias_dictionary[ip], time))
 
