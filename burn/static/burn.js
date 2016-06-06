@@ -17,6 +17,7 @@ module.factory('_feedback', [function() {
 
 module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope, $http, _feedback) {
   $scope.generate_password = true;
+  $scope.anonymize_ip = true;
   $scope.step = 1;
   $scope.expiry = "hour";
 
@@ -66,7 +67,11 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
 
     feedback("info", "sending to server...");
 
-    $http.post("/create", {message: message, expiry: expiry_time})
+    $http.post("/create", {
+      message: message,
+      expiry: expiry_time,
+      anonymize_ip: $scope.anonymize_ip
+    })
     .success(function(data) {
       step2(data, password);
     })

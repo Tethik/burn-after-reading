@@ -37,10 +37,12 @@
 
   <div class="visitor_box">
     <b>Visitors</b>
-    <p>{{unique_visitors}} unique IP-address{% if unique_visitors > 1 %}es have{% else %} has{% endif %} visited this page. The table below shows every visit which fetched the encrypted message. </p>
+    <p>{{unique_visitors}} unique IP-address{% if unique_visitors > 1 %}es have{% else %} has{% endif %} visited this page. The table below shows every visit that fetched the encrypted message.
+      This means they knew the unique identifier, but it does not necessarily mean they had the password to decrypt.  {% if anonymous %} IP addresses are anonymized by use of a hash function. {% endif %}
+     </p>
     <table class="u-full-width">
       <thead>
-        <tr><td>IP</td><td>Time</td><td></td></tr>
+        <tr><td>{% if anonymous %}IP-hash{% else %}IP{% endif %}</td><td>Time</td><td></td></tr>
       </thead>
       <tbody>
       {% for v in visitors %}

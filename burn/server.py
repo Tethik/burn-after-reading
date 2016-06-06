@@ -16,11 +16,12 @@ def create():
     storage = MemoryStorage(MAX_STORAGE)
     message = request.json["message"]
     expiry = datetime.utcfromtimestamp(request.json["expiry"] / 1000)
+    anonymize_ip = request.json["anonymize_ip"]
     if len(message) > MAX_MESSAGE_LENGTH:
         return "Message is too long. Please keep it shorter than 250 characters.", 403
 
     ip = request.remote_addr
-    id = storage.put(message, expiry, ip)
+    id = storage.put(message, expiry, anonymize_ip, ip)
     return str(id)
 
 @app.route("/<token>", methods=["GET","DELETE"])
@@ -40,9 +41,9 @@ def fetch(token):
 
     visitors = storage.list_visitors(u)
     unique_visitors = set([v[0] for v in visitors])
-    msg, expiry = ret
+    msg, expiry, anonymize_ip_salt = ret
     return render_template("open.html", msg=msg, expiry=expiry,
-        visitors=visitors, unique_visitors=len(unique_visitors))
+        visitors=visitors, unique_visitors=len(unique_visitors), anonymous=(anonymize_ip_salt != None))
 
 @app.route("/about")
 def about():

@@ -72,38 +72,38 @@ class TestMemoryStorage(TestCase):
         store.put("asd",  datetime.datetime.now())
         self.assertEqual(store.get("asd' UNION SELECT * FROM lulz"), None)
 
-    def test_capacity_actual_size(self):
-        try:
-            os.remove(MemoryStorage.db)
-        except:
-            pass
-
-        size = 2
-        maxsize = 65536
-        longmsg = "A"*2048
-
-        store = MemoryStorage(size)
-        store.clear()
-
-        while size <= maxsize:
-            store.set_capacity(size)
-            while store.size() < size:
-                store.put(longmsg, datetime.datetime.now())
-            statinfo = os.stat(MemoryStorage.db)
-            print(size, str(statinfo.st_size / 1024) + " kb", str(statinfo.st_size / 1024 / 1024) + " mb")
-            size *= 2
-            self.assertTrue(statinfo.st_size / 1024 / 1024 < 400)
-
-        store.clear()
+    # def test_capacity_actual_size(self):
+    #     try:
+    #         os.remove(MemoryStorage.db)
+    #     except:
+    #         pass
+    #
+    #     size = 2
+    #     maxsize = 65536
+    #     longmsg = "A"*2048
+    #
+    #     store = MemoryStorage(size)
+    #     store.clear()
+    #
+    #     while size <= maxsize:
+    #         store.set_capacity(size)
+    #         while store.size() < size:
+    #             store.put(longmsg, datetime.datetime.now())
+    #         statinfo = os.stat(MemoryStorage.db)
+    #         print(size, str(statinfo.st_size / 1024) + " kb", str(statinfo.st_size / 1024 / 1024) + " mb")
+    #         size *= 2
+    #         self.assertTrue(statinfo.st_size / 1024 / 1024 < 400)
+    #
+    #     store.clear()
 
     def test_visitor_log_delete(self):
         store = MemoryStorage(3)
         store.clear()
-        key = store.put("asd", datetime.datetime.utcnow() + datetime.timedelta(0,3), "127.0.0.1")
+        key = store.put("asd", datetime.datetime.utcnow() + datetime.timedelta(0,3), False, "127.0.0.1")
         visitors = store.list_visitors(key)
         self.assertEqual(visitors[0][0], "127.0.0.1")
 
-        store.get(key, "127.0.0.2")
+        store.get(key, ip = "127.0.0.2")
         visitors = store.list_visitors(key)
         self.assertEqual(visitors[0][0], "127.0.0.1")
         self.assertEqual(visitors[1][0], "127.0.0.2")

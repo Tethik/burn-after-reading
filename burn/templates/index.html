@@ -13,10 +13,16 @@
 
      <div class="row">
        <div class="one-half column">
-         <label>
-           <input type="checkbox" ng-model="generate_password">
-           <span class="label-body">Create a password for me.</span>
-         </label>
+           <label class="u-pull-left">
+             <input type="checkbox" ng-model="generate_password">
+             <span class="label-body">Create a password for me </span>
+           </label>
+
+           <label class="u-pull-left">
+             &nbsp;
+             <input type="checkbox" ng-model="anonymize_ip">
+             <span class="label-body">Anonymize visitors</span>
+           </label>
        </div>
 
        <div class="one-half column right-align">
@@ -33,8 +39,8 @@
        <label for="password">
          Password
        </label>
-       <p>This password will be used to encrypt the message.</p>
        <input type="text" name="password" placeholder="correcthorsebatterystaple" ng-model="user_password" class="u-full-width">
+       <p>This password will be used to encrypt the message.</p>
      </div>
 
      <input class="button-primary" value="Submit" type="submit" ng-click="send(message)">

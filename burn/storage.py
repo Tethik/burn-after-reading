@@ -1,6 +1,7 @@
 import sqlite3
 import uuid
 from datetime import datetime
+import hashlib
 
 class MemoryStorage(object):
 
@@ -14,7 +15,13 @@ class MemoryStorage(object):
         self.conn = sqlite3.connect(self.db)
         c = self.conn.cursor()
         c.execute("PRAGMA foreign_keys = ON")
-        c.execute("create table if not exists storage (key NVARCHAR(100) PRIMARY KEY, value TEXT, expiry DATE, created DATE)")
+        c.execute("""create table if not exists storage (
+            key NVARCHAR(100) PRIMARY KEY,
+            value TEXT,
+            expiry DATE,
+            created DATE,
+            anonymize_ip_salt NVARCHAR(100)
+        )""")
         c.execute("""
             create table if not exists visitors (
                 storage_key NVARCHAR(100),
@@ -29,8 +36,10 @@ class MemoryStorage(object):
         # Expire on every new object creation => so every request.
         self.expire()
 
-    def _add_visited_log(self, c, key, ip, creator):
+    def _add_visited_log(self, c, key, ip, creator, salt):
         if ip != None:
+            if salt != None:
+                ip = hashlib.sha256(salt + ip).hexdigest()
             c.execute("""
              INSERT INTO visitors (storage_key, ip, visited, creator)
              VALUES (?, ?, ?, ?)""",
@@ -49,7 +58,7 @@ class MemoryStorage(object):
         c = self.conn.cursor()
 
         c.execute("""
-            SELECT value, expiry FROM storage
+            SELECT value, expiry, anonymize_ip_salt FROM storage
             WHERE key = ?
             """, (str(key),))
         res = c.fetchone()
@@ -57,11 +66,11 @@ class MemoryStorage(object):
         if not res:
             return res
 
-        self._add_visited_log(c, key, ip, 0)
+        self._add_visited_log(c, key, ip, 0, res[2])
 
         return res
 
-    def put(self, value, expiry, ip = None):
+    def put(self, value, expiry, anonymize_ip = True, ip = None):
         c = self.conn.cursor()
         # Enforce capacity by removing the oldest entry
         if self.size() >= self.capacity:
@@ -70,12 +79,15 @@ class MemoryStorage(object):
                 WHERE created = (SELECT MIN(created) FROM storage)
                 """)
         key = uuid.uuid4()
+        salt = None
+        if anonymize_ip:
+            salt = str(uuid.uuid4())
         c.execute("""
-            INSERT INTO storage (key, value, expiry, created)
-            VALUES (?, ?, ?, ?)""",
-            (str(key), value, expiry, datetime.now()))
+            INSERT INTO storage (key, value, expiry, created, anonymize_ip_salt)
+            VALUES (?, ?, ?, ?, ?)""",
+            (str(key), value, expiry, datetime.now(), salt))
 
-        self._add_visited_log(c, key, ip, 1)
+        self._add_visited_log(c, key, ip, 1, salt)
         self.conn.commit()
         return key
 
