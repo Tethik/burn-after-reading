@@ -38,8 +38,8 @@ class MemoryStorage(object):
 
     def _add_visited_log(self, c, key, ip, creator, salt):
         if ip != None:
-            if salt != None:
-                ip = hashlib.sha256(salt + ip).hexdigest()
+            if salt != None:                
+                ip = hashlib.sha256((salt + ip).encode()).hexdigest()
             c.execute("""
              INSERT INTO visitors (storage_key, ip, visited, creator)
              VALUES (?, ?, ?, ?)""",

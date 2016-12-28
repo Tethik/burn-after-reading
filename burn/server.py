@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, abort, send_from_directory
-from burn.storage import MemoryStorage
 from datetime import datetime
 import uuid
+from flask import Flask, render_template, request, abort, send_from_directory
+from burn.storage import MemoryStorage
 
 app = Flask(__name__)
 MAX_MESSAGE_LENGTH = 2048 # No exact math done to determine this.
@@ -24,29 +24,27 @@ def create():
     id = storage.put(message, expiry, anonymize_ip, ip)
     return str(id)
 
-@app.route("/<token>", methods=["GET","DELETE"])
+@app.route("/<uuid:token>", methods=["GET","DELETE"])
 def fetch(token):
-    storage = MemoryStorage(500)
-    u = uuid.UUID(token)
+    storage = MemoryStorage(500)    
     ip = request.remote_addr
 
-    ret = storage.get(u, ip)
+    ret = storage.get(token, ip)
 
     if not ret:
         return abort(404)
 
     if request.method == "DELETE":
-        storage.delete(u)
+        storage.delete(token)
         return "ok"
 
-    visitors = storage.list_visitors(u)
+    visitors = storage.list_visitors(token)
     unique_visitors = set([v[0] for v in visitors])
 
     aliased_visitors = list()
     v_counter = 1
     alias_dictionary = dict()
-    for v in visitors:
-        ip, time, creator = v
+    for ip, time, creator in visitors:
         if ip not in alias_dictionary:
             if creator:
                 alias_dictionary[ip] = "Author (" + ip + ")"
