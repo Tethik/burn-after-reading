@@ -36,8 +36,5 @@ to the heroku endpoint.
 * [sqllite3](https://www.sqlite.org/)
 
 ## Todo
-* Review crypto parameters further
-* Tor hidden service
-* Encrypt sqlite database to prevent other processes from tampering.
-* Warning when not HTTPS.
-* Proof-of-key to authorize burn operation.
+See issues:
+https://github.com/Tethik/burn-after-reading/issues/
