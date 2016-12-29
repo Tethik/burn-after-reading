@@ -2,10 +2,10 @@
 A service to share short term messages stored in memory. Using client side
 crypto where the key is shared via the url hash.
 
-[Demo](https://burn-after-reading.herokuapp.com/)
+[Demo](https://burn.blacknode.se/)
 
 ## Running locally
-Python version: 2.7
+Python version: 2.7, 3
 
 Install requirements found in requirements.txt via
 ```
