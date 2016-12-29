@@ -33,6 +33,15 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
     $scope.step = 2;
   };
 
+  $scope.copy = function() {
+    document.getElementById("theurlbox").select();
+    if(document.execCommand('copy')) {
+      feedback("info", "The message has been copied to your clipboard.")
+    } else {
+      feedback("error", "Could not copy the message to your keyboard, your browser may not support this feature.")
+    }    
+  };
+
   $scope.send = function(message) {
     if(!message || message.length == 0) {
       return feedback("info", "Type something!");
@@ -119,6 +128,15 @@ module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $
     console.log($scope.decrypted);
 
     return true;
+  };
+
+  $scope.copy = function() {
+    document.getElementById("thebox").select();
+    if(document.execCommand('copy')) {
+      feedback("info", "The message has been copied to your clipboard.")
+    } else {
+      feedback("error", "Could not copy the message to your keyboard, your browser may not support this feature.")
+    }    
   };
 
   $scope.burn = function() {

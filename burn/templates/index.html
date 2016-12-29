@@ -47,10 +47,9 @@
   </div>
 
    <div id="step2" ng-show="step == 2">
-     <p>
-       Your message has been encrypted and stored. Here is the url you need to share the message:<br />
-       <input type="text" onclick="this.select();" name="url" ng-model="share_url" class="u-full-width" readonly>
-     </p>
+     <p>Your message has been encrypted and stored. Here is the url which you need to share the message:</p>     
+     <input type="text" onclick="this.select();" name="url" ng-model="share_url" class="u-full-width" id="theurlbox" readonly>
+     <button class="button-copy" ng-click="copy()">copy</button>
    </div>
    {% endraw %}
 </form>

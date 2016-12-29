@@ -17,14 +17,19 @@
     <input type="hidden" id="expiry" value="{{expiry}}">
 
     <div ng-show="decrypted_succesfully">
-      {% raw %}
-      <label for="message">Message</label>
+      {% raw %}      
+      <label for="message">Message</label>    
       <textarea class="u-full-width" id="thebox" name="message" rows="6" readonly>{{decrypted}}</textarea>
-
-      <div ng-hide="burned">
-        <p>Once you've read the message, press "burn" to delete it from the server. It will expire automatically {{expiry}}</p>
-        <button class="button-burn" ng-click="burn()">burn</button>
+      
+      <div class="u-pull-right">
+        <button class="button-copy" ng-click="copy()">copy</button>
+        <button class="button-burn" ng-click="burn()" ng-hide="burned">burn</button>
       </div>
+      <div class="" ng-hide="burned">
+        Once you've read the message, press "burn" to delete it from the server. It will expire automatically {{expiry}}       
+      </div>
+      <div class="u-cf"></div>
+      
       {% endraw %}
     </div>
 
