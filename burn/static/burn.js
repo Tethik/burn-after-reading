@@ -96,25 +96,30 @@ module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $
     _feedback($scope, status, reason);
   }
 
+  var convertDate = function(datestring) {
+    var date = new Date(datestring);
+    var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+    var offset = date.getTimezoneOffset() / 60;
+    var hours = date.getHours();
+    newDate.setHours(hours - offset);
+    return newDate;
+  }
+
   var decrypt = function(password) {
 
     feedback("info", "decrypting...");
 
     try {
-      console.log(id);
-      console.log(password);
+      // console.log(id);
+      // console.log(password);
 
       var fixed = document.getElementById("expiry").value.replace(" ","T");
-      var date = new Date(fixed);
-      var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
-      var offset = date.getTimezoneOffset() / 60;
-      var hours = date.getHours();
-      newDate.setHours(hours - offset);
+      var date = convertDate(fixed);
 
-      $scope.expiry = newDate.toLocaleString();
+      $scope.expiry = date.toLocaleString();
 
       var message = document.getElementById("themessage").value;
-      console.log(message);
+      // console.log(message);
       var debased = atob(message);
       message = JSON.parse(debased);
       $scope.decrypted = sjcl.decrypt(password, message);
@@ -162,5 +167,11 @@ module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $
   password = sjcl.codec.base64url.toBits(password);
 
   $scope.decrypted_succesfully = decrypt(password);
+
+  var time_elements = document.getElementsByTagName("time");
+  for(var i = 0; i < time_elements.length; i++) {
+    var el = time_elements[i];
+    el.innerHTML = convertDate(el.attributes['datetime'].value).toLocaleString();    
+  }  
 
 }]);

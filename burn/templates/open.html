@@ -28,8 +28,7 @@
       <div class="" ng-hide="burned">
         Once you've read the message, press "burn" to delete it from the server. It will expire automatically {{expiry}}       
       </div>
-      <div class="u-cf"></div>
-      
+      <div class="u-cf"></div>      
       {% endraw %}
     </div>
 
@@ -38,7 +37,6 @@
       <input type="text" ng-model="password" placeholder="" name="password">
       <button ng-click="attempt_decrypt()">decrypt</button>
     </div>
-
   </div>
 
   <div class="visitor_box">
@@ -54,7 +52,7 @@
       {% for v in visitors %}
         <tr>
           <td>{{v[0]}}</td>
-          <td>{{v[1]}}</td>
+          <td><time datetime="{{v[1]}}">{{v[1]}}</time></td>
         </tr>
       {% endfor %}
       </tbody>

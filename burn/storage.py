@@ -84,8 +84,7 @@ class MemoryStorage(object):
             salt = str(uuid.uuid4())
         c.execute("""
             INSERT INTO storage (key, value, expiry, created, anonymize_ip_salt)
-            VALUES (?, ?, ?, ?, ?)""",
-            (str(key), value, expiry, datetime.now(), salt))
+            VALUES (?, ?, ?, ?, ?)""", (str(key), value, expiry, datetime.utcnow(), salt))
 
         self._add_visited_log(c, key, ip, 1, salt)
         self.conn.commit()

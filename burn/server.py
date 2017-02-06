@@ -1,5 +1,5 @@
 from datetime import datetime
-import uuid
+
 from flask import Flask, render_template, request, abort, send_from_directory
 from burn.storage import MemoryStorage
 
@@ -26,9 +26,9 @@ def create():
 
 @app.route("/<uuid:token>", methods=["GET","DELETE"])
 def fetch(token):
-    storage = MemoryStorage(500)    
+    storage = MemoryStorage(500)
     ip = request.remote_addr
-
+    
     ret = storage.get(token, ip)
 
     if not ret:
@@ -44,14 +44,14 @@ def fetch(token):
     aliased_visitors = list()
     v_counter = 1
     alias_dictionary = dict()
-    for ip, time, creator in visitors:
-        if ip not in alias_dictionary:
+    for identifier, time, creator in visitors:
+        if identifier not in alias_dictionary:
             if creator:
-                alias_dictionary[ip] = "Author (" + ip + ")"
+                alias_dictionary[identifier] = "Author (" + identifier + ")"
             else:
-                alias_dictionary[ip] = "Visitor " + str(v_counter) + " (" + ip + ")"
+                alias_dictionary[identifier] = "Visitor " + str(v_counter) + " (" + identifier + ")"
                 v_counter += 1
-        aliased_visitors.append((alias_dictionary[ip], time))
+        aliased_visitors.append((alias_dictionary[identifier], time))
 
     msg, expiry, anonymize_ip_salt = ret
     return render_template("open.html", msg=msg, expiry=expiry,
