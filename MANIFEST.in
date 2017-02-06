@@ -1,2 +1,2 @@
-recursive-include burn/static/*
-recursive-include burn/templates/*
+recursive-include burn/static *
+recursive-include burn/templates *
