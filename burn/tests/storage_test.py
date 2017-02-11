@@ -1,9 +1,9 @@
-from unittest import TestCase
-from burn.storage import MemoryStorage
 import datetime
 from time import sleep
 import os
 import uuid
+from unittest import TestCase
+from burn.storage import MemoryStorage
 
 class TestMemoryStorage(TestCase):
 
@@ -16,20 +16,20 @@ class TestMemoryStorage(TestCase):
         MemoryStorage.db = self.db_location
 
     def test_put(self):
-        store = MemoryStorage(3)
+        store = MemoryStorage(3, self.db_location)
         store.clear()
         store.put("asd", datetime.datetime.now())
         self.assertEqual(store.size(), 1)
 
     def test_get(self):
-        store = MemoryStorage(3)
+        store = MemoryStorage(3, self.db_location)
         store.clear()
         key = store.put("asd", datetime.datetime.now())
         self.assertEqual(store.get(key)[0], "asd")
 
     def test_capacity(self):
         testcapacity = 50
-        store = MemoryStorage(testcapacity)
+        store = MemoryStorage(testcapacity, self.db_location)
         store.clear()
         first_key = None
         for i in range(testcapacity):
@@ -43,33 +43,33 @@ class TestMemoryStorage(TestCase):
         self.assertEqual(store.get(first_key), None)
 
     def test_delete(self):
-        store = MemoryStorage(3)
+        store = MemoryStorage(3, self.db_location)
         store.clear()
-        id = store.put("asd", datetime.datetime.now())
+        _id = store.put("asd", datetime.datetime.now())
         self.assertEqual(store.size(), 1)
-        store.delete(id)
+        store.delete(_id)
         self.assertEqual(store.size(), 0)
         self.assertEqual(store.get(id), None)
 
     def test_expiry(self):
-        store = MemoryStorage(3)
+        store = MemoryStorage(3, self.db_location)
         store.clear()
-        now = datetime.datetime.utcnow() + datetime.timedelta(0,3)
-        id = store.put("asd", now)
+        now = datetime.datetime.utcnow() + datetime.timedelta(0, 3)
+        _id = store.put("asd", now)
         self.assertEqual(store.size(), 1)
         for _ in range(100):
             store.expire()
             self.assertEqual(store.size(), 1)
-            self.assertNotEqual(store.get(id), None)
+            self.assertNotEqual(store.get(_id), None)
         sleep(3)
         store.expire()
         self.assertEqual(store.size(), 0)
-        self.assertEqual(store.get(id), None)
+        self.assertEqual(store.get(_id), None)
 
     def test_sqli(self):
-        store = MemoryStorage(3)
+        store = MemoryStorage(3, self.db_location)
         store.put("asd", datetime.datetime.now())
-        store.put("asd",  datetime.datetime.now())
+        store.put("asd", datetime.datetime.now())
         self.assertEqual(store.get("asd' UNION SELECT * FROM lulz"), None)
 
     # def test_capacity_actual_size(self):
@@ -97,13 +97,14 @@ class TestMemoryStorage(TestCase):
     #     store.clear()
 
     def test_visitor_log_delete(self):
-        store = MemoryStorage(3)
+        store = MemoryStorage(3, self.db_location)
         store.clear()
-        key = store.put("asd", datetime.datetime.utcnow() + datetime.timedelta(0,3), False, "127.0.0.1")
+        key = store.put("asd", datetime.datetime.utcnow() + datetime.timedelta(0, 3),
+                        False, "127.0.0.1")
         visitors = store.list_visitors(key)
         self.assertEqual(visitors[0][0], "127.0.0.1")
 
-        store.get(key, ip = "127.0.0.2")
+        store.get(key, ip="127.0.0.2")
         visitors = store.list_visitors(key)
         self.assertEqual(visitors[0][0], "127.0.0.1")
         self.assertEqual(visitors[1][0], "127.0.0.2")
@@ -112,7 +113,7 @@ class TestMemoryStorage(TestCase):
         self.assertEqual(store.list_visitors(key), [])
 
     def test_get_non_existent(self):
-        u = str(uuid.uuid4())
-        store = MemoryStorage(3)
+        uid = str(uuid.uuid4())
+        store = MemoryStorage(3, self.db_location)
         store.clear()
-        store.get(u, "127.0.0.2")
+        store.get(uid, "127.0.0.2")

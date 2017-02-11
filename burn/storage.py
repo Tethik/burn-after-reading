@@ -4,13 +4,11 @@ from datetime import datetime
 import hashlib
 
 class MemoryStorage(object):
-
-    db = "/dev/shm/burn.db"
-
     def set_capacity(self, capacity):
-        self.capacity = capacity
+        self.capacity = capacity        
 
-    def __init__(self, capacity):
+    def __init__(self, capacity, database_file):
+        self.db = database_file
         self.capacity = capacity
         self.conn = sqlite3.connect(self.db)
         c = self.conn.cursor()

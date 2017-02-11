@@ -21,6 +21,8 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
   $scope.step = 1;
   $scope.expiry = "hour";
 
+  $scope.maxlength = parseInt(document.getElementById('server_says_maxlength_is').value);
+
   var feedback = function(status, reason) {
     _feedback($scope, status, reason);
   }
@@ -50,10 +52,11 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
     console.log(message);
     if($scope.generate_password) {
       feedback("info", "generating a password...");
-      password = sjcl.random.randomWords(8); // 32 bits per word. 8*32 = 256 bits. 2^256 combinations.
+      password = sjcl.random.randomWords(8); // 32 bits per word. 8*32 = 256 bits.
     } else {
-      if(!$scope.user_password || $scope.user_password.length == 0)
+      if(!$scope.user_password || $scope.user_password.length == 0) {
         return feedback("info", "Password can't be empty!");
+      }
       password = $scope.user_password;
     }
 
@@ -71,7 +74,9 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
     feedback("info", "encrypting...");
     var rp = {};
     message = sjcl.encrypt(password, message, {}, rp);
-    message = btoa(JSON.stringify(message));
+    console.log(message)    
+    message = JSON.stringify(message);
+    console.log(message.length)
     password = rp.key;
 
     feedback("info", "sending to server...");
@@ -120,8 +125,8 @@ module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $
 
       var message = document.getElementById("themessage").value;
       // console.log(message);
-      var debased = atob(message);
-      message = JSON.parse(debased);
+      // var debased = JSON.parse(message);
+      message = JSON.parse(message);
       $scope.decrypted = sjcl.decrypt(password, message);
     } catch(err) {
       feedback("error", "Failed to decrypt. Please provide the correct password.");

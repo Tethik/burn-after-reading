@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <form ng-controller="CreateCtl">
+  <input type="hidden" id="server_says_maxlength_is" value="{{maxlength}}">
   {% raw %}
   <div id="statusbox" ng-show="status" class="msg {{status}}">
     {{reason}}
@@ -8,8 +9,8 @@
 
 
   <div id="step1" ng-show="step == 1">
-    <label for="exampleMessage">Message ({{500 - message.length}} characters left)</label>
-     <textarea class="u-full-width" id="thebox" placeholder="Hi Dave …" ng-model="message" maxlength="500" required></textarea>
+    <label for="exampleMessage">Message ({{maxlength - message.length}} characters left)</label>
+     <textarea class="u-full-width" id="thebox" placeholder="Hi Dave …" ng-model="message" maxlength="{{maxlength}}" required></textarea>
 
      <div class="row">
        <div class="one-half column">
