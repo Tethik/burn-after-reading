@@ -131,9 +131,14 @@ module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $
       message = JSON.parse(message);
       $scope.decrypted = sjcl.decrypt(password, message);
     } catch(err) {
-      feedback("error", "Failed to decrypt. Please provide the correct password.");
-      console.log(err);
-      return false;
+      // Try the base64 decoded, just in case the user copy pasted the url password.
+      try {
+        $scope.decrypted = sjcl.decrypt(sjcl.codec.base64url.toBits(password), message);       
+      } catch(err) {
+        feedback("error", "Failed to decrypt. Please provide the correct password.");
+        console.log(err);
+        return false;
+      }
     }
 
     feedback("info", "Successfully decrypted the message.");
