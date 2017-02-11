@@ -24,6 +24,7 @@ def create():
     message = request.json["message"]
     expiry = datetime.utcfromtimestamp(request.json["expiry"] / 1000)
     anonymize_ip = request.json["anonymize_ip"]
+    burn_after_reading = request.json["burn_after_reading"]
     maxlength = app.config.get('BURN_MAX_MESSAGE_LENGTH', 2048)
     # ciphertext padding. Guesstimated.
     ciphertext_maxlength = AES_CIPHER_SIZE - (maxlength % AES_CIPHER_SIZE) + maxlength
@@ -35,20 +36,21 @@ def create():
     if len(message) > ciphertext_maxlength:
         return "Message is too long. Please keep it shorter than %s characters." % maxlength, 403
 
-    _id = app.storage.put(message, expiry, anonymize_ip, request.remote_addr)
+    _id = app.storage.put(message, expiry, anonymize_ip, request.remote_addr, burn_after_reading=burn_after_reading)
     return str(_id)
 
-@app.route("/<uuid:token>", methods=["GET","DELETE"])
+@app.route("/<uuid:token>", methods=["DELETE"])
+def delete(token):
+    app.storage.delete(token)
+    return "ok"
+
+@app.route("/<uuid:token>", methods=["GET"])
 def fetch(token):    
     ret = app.storage.get(token, request.remote_addr)
 
     if not ret:
         return abort(404)
-
-    if request.method == "DELETE":
-        app.storage.delete(token)
-        return "ok"
-
+        
     visitors = app.storage.list_visitors(token)
     unique_visitors = set([v[0] for v in visitors])
 
@@ -64,9 +66,10 @@ def fetch(token):
                 v_counter += 1
         aliased_visitors.append((alias_dictionary[identifier], time))
 
-    msg, expiry, anonymize_ip_salt = ret
+    msg, expiry, anonymize_ip_salt, burn_after_reading = ret
     return render_template("open.html", msg=msg, expiry=expiry,
-                           visitors=aliased_visitors, unique_visitors=len(unique_visitors),
+                           visitors=aliased_visitors, burn_after_reading=burn_after_reading,
+                           unique_visitors=len(unique_visitors),
                            anonymous=(anonymize_ip_salt != None))
 
 @app.route("/about")

@@ -13,10 +13,10 @@
      <textarea class="u-full-width" id="thebox" placeholder="Hi Dave …" ng-model="message" maxlength="{{maxlength}}" required></textarea>
 
      <div class="row">
-       <div class="one-half column">
+       <div class="eight columns" style="padding-top: 6px;">
            <label class="u-pull-left">
              <input type="checkbox" ng-model="generate_password">
-             <span class="label-body">Create a password for me </span>
+             <span class="label-body">Create a password for me</span>
            </label>
 
            <label class="u-pull-left">
@@ -24,11 +24,17 @@
              <input type="checkbox" ng-model="anonymize_ip">
              <span class="label-body">Anonymize visitor log</span>
            </label>
+
+            <label class="u-pull-left">
+             &nbsp;             
+             <input type="checkbox" ng-model="burn_after_reading">
+             <span class="label-body">Burn After Reading 🔥</span>
+           </label>           
        </div>
 
-       <div class="one-half column right-align">
-           <span class="label-body">Expire in:</span>
-           <select name="expiry" ng-model="expiry">
+       <div class="four columns right-align">
+           <span class="label-body">Expire after:</span>
+           <select name="expiry" ng-model="expiry">             
              <option value="hour" selected>One hour</option>
              <option value="day">One day</option>
              <option value="week">One week</option>

@@ -18,6 +18,7 @@ module.factory('_feedback', [function() {
 module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope, $http, _feedback) {
   $scope.generate_password = true;
   $scope.anonymize_ip = true;
+  $scope.burn_after_reading = false;
   $scope.step = 1;
   $scope.expiry = "hour";
 
@@ -84,7 +85,8 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
     $http.post("/create", {
       message: message,
       expiry: expiry_time,
-      anonymize_ip: $scope.anonymize_ip
+      anonymize_ip: $scope.anonymize_ip,
+      burn_after_reading: $scope.burn_after_reading,
     })
     .success(function(data) {
       step2(data, password);
@@ -171,7 +173,9 @@ module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $
   password = password.substr(1, password.length-1);
   password = sjcl.codec.base64url.toBits(password);
 
-  $scope.decrypted_succesfully = decrypt(password);
+  $scope.decrypted_succesfully = decrypt(password);  
+  $scope.burned = $scope.burn_was_auto = document.getElementById("burned").value == "1";
+  
 
   var time_elements = document.getElementsByTagName("time");
   for(var i = 0; i < time_elements.length; i++) {

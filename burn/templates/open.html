@@ -15,6 +15,7 @@
   <div>
     <input type="hidden" id="themessage" value="{{msg|e}}">
     <input type="hidden" id="expiry" value="{{expiry}}">
+    <input type="hidden" id="burned" value="{{burn_after_reading}}">
 
     <div ng-show="decrypted_succesfully">
       {% raw %}      
@@ -23,22 +24,28 @@
       
       <div class="u-pull-right">
         <button class="button-copy" ng-click="copy()">copy</button>
-        <button class="button-burn" ng-click="burn()" ng-hide="burned">burn</button>
+        <button class="button-burn" ng-click="burn()" ng-hide="burned">burn 🔥</button>
       </div>
-      <div class="" ng-hide="burned">
+      <div ng-hide="burned">
         Once you've read the message, press "burn" to delete it from the server. It will expire automatically {{expiry}}       
       </div>
       <div class="u-cf"></div>      
       {% endraw %}
     </div>
 
-    <div ng-hide="decrypted_succesfully" ng-hide="status">
+    <div ng-hide="decrypted_succesfully" ng-hide="status">      
       <label for="password">Password</label>
       <input type="text" ng-model="password" placeholder="" name="password">
-      <button ng-click="attempt_decrypt()">decrypt</button>
+      <button ng-click="attempt_decrypt()">decrypt</button>      
+    </div>
+
+    <div ng-show="burned">
+        The message has been deleted from the server. <span ng-show="burn_was_auto">The message was set to burn automatically after reading.</span>
+        <b ng-show="!decrypted_succesfully">It is still available in this session, but you need to decrypt it first.</b> After you leave this page the message will be gone forever, so make sure that you made your copy.        
     </div>
   </div>
 
+  {% if not burn_after_reading %}
   <div class="visitor_box">
     <b>Visitors</b>
     <p>{{unique_visitors}} unique IP-address{% if unique_visitors > 1 %}es have{% else %} has{% endif %} visited this page. The table below shows every visit that fetched the encrypted message.
@@ -58,6 +65,7 @@
       </tbody>
     </table>
   </div>
+  {% endif %}
 </form>
 
 

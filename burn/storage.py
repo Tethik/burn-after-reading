@@ -18,6 +18,7 @@ class MemoryStorage(object):
             value TEXT,
             expiry DATE,
             created DATE,
+            burn_after_reading BIT,
             anonymize_ip_salt NVARCHAR(100)
         )""")
         c.execute("""
@@ -56,7 +57,7 @@ class MemoryStorage(object):
         c = self.conn.cursor()
 
         c.execute("""
-            SELECT value, expiry, anonymize_ip_salt FROM storage
+            SELECT value, expiry, anonymize_ip_salt, burn_after_reading FROM storage
             WHERE key = ?
             """, (str(key),))
         res = c.fetchone()
@@ -64,11 +65,16 @@ class MemoryStorage(object):
         if not res:
             return res
 
+        # Burn After Reading enabled.
+        if res[3]:
+            self.delete(key)
+            return res
+
         self._add_visited_log(c, key, ip, 0, res[2])
 
         return res
 
-    def put(self, value, expiry, anonymize_ip = True, ip = None):
+    def put(self, value, expiry, anonymize_ip=True, ip=None, burn_after_reading=False):
         c = self.conn.cursor()
         # Enforce capacity by removing the oldest entry
         if self.size() >= self.capacity:
@@ -81,8 +87,8 @@ class MemoryStorage(object):
         if anonymize_ip:
             salt = str(uuid.uuid4())
         c.execute("""
-            INSERT INTO storage (key, value, expiry, created, anonymize_ip_salt)
-            VALUES (?, ?, ?, ?, ?)""", (str(key), value, expiry, datetime.utcnow(), salt))
+            INSERT INTO storage (key, value, expiry, created, anonymize_ip_salt, burn_after_reading)
+            VALUES (?, ?, ?, ?, ?, ?)""", (str(key), value, expiry, datetime.utcnow(), salt, burn_after_reading))
 
         self._add_visited_log(c, key, ip, 1, salt)
         self.conn.commit()

@@ -117,3 +117,12 @@ class TestMemoryStorage(TestCase):
         store = MemoryStorage(3, self.db_location)
         store.clear()
         store.get(uid, "127.0.0.2")
+
+    def test_burn_after_reading(self):
+        store = MemoryStorage(3, self.db_location)
+        store.clear()
+        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
+        self.assertEqual(store.size(), 1)
+        self.assertEqual(store.get(key)[0], "asd")
+        self.assertEqual(store.get(key), None)
+        self.assertEqual(store.size(), 0) # Burn should have kicked in
