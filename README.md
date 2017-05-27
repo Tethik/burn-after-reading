@@ -27,6 +27,11 @@ or with gunicorn
 gunicorn burn.wsgi
 ```
 
+## Testing 
+```bash
+py.test
+```
+
 ## Tech and Credits
 
 - [AngularJS](https://angularjs.org/)
