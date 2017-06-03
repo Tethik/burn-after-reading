@@ -1,6 +1,7 @@
 import datetime
 from time import sleep
 import os
+import shutil
 import uuid
 from unittest import TestCase
 from burn.storage import Storage
@@ -9,27 +10,32 @@ class TestStorage(TestCase):
 
     def setUp(self):
         self.db_location = "/tmp/burn-test.db"
+        self.file_path = "/tmp/burn-test-attachment/"
         try:
             os.remove(self.db_location)
         except:
             pass
         Storage.db = self.db_location
 
+    def tearDown(self):
+        shutil.rmtree(self.file_path)
+        os.remove(self.db_location)
+
     def test_put(self):
-        store = Storage(3, self.db_location)
+        store = Storage(3, self.file_path, self.db_location)
         store.clear()
         store.put("asd", datetime.datetime.now())
         self.assertEqual(store.size(), 1)
 
     def test_get(self):
-        store = Storage(3, self.db_location)
+        store = Storage(3, self.file_path, self.db_location)
         store.clear()
         key = store.put("asd", datetime.datetime.now())
         self.assertEqual(store.get(key)[0], "asd")
 
     def test_capacity(self):
         testcapacity = 50
-        store = Storage(testcapacity, self.db_location)
+        store = Storage(testcapacity, self.file_path, self.db_location)
         store.clear()
         first_key = None
         for i in range(testcapacity):
@@ -43,7 +49,7 @@ class TestStorage(TestCase):
         self.assertEqual(store.get(first_key), None)
 
     def test_delete(self):
-        store = Storage(3, self.db_location)
+        store = Storage(3, self.file_path, self.db_location)
         store.clear()
         _id = store.put("asd", datetime.datetime.now())
         self.assertEqual(store.size(), 1)
@@ -52,7 +58,7 @@ class TestStorage(TestCase):
         self.assertEqual(store.get(id), None)
 
     def test_expiry(self):
-        store = Storage(3, self.db_location)
+        store = Storage(3, self.file_path, self.db_location)
         store.clear()
         now = datetime.datetime.utcnow() + datetime.timedelta(0, 3)
         _id = store.put("asd", now)
@@ -67,7 +73,7 @@ class TestStorage(TestCase):
         self.assertEqual(store.get(_id), None)
 
     def test_sqli(self):
-        store = Storage(3, self.db_location)
+        store = Storage(3, self.file_path, self.db_location)
         store.put("asd", datetime.datetime.now())
         store.put("asd", datetime.datetime.now())
         self.assertEqual(store.get("asd' UNION SELECT * FROM lulz"), None)
@@ -97,7 +103,7 @@ class TestStorage(TestCase):
     #     store.clear()
 
     def test_visitor_log_delete(self):
-        store = Storage(3, self.db_location)
+        store = Storage(3, self.file_path, self.db_location)
         store.clear()
         key = store.put("asd", datetime.datetime.utcnow() + datetime.timedelta(0, 3),
                         False, "127.0.0.1")
@@ -114,15 +120,46 @@ class TestStorage(TestCase):
 
     def test_get_non_existent(self):
         uid = str(uuid.uuid4())
-        store = Storage(3, self.db_location)
+        store = Storage(3, self.file_path, self.db_location)
         store.clear()
         store.get(uid, "127.0.0.2")
 
     def test_burn_after_reading(self):
-        store = Storage(3, self.db_location)
+        store = Storage(3, self.file_path, self.db_location)
         store.clear()
         key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
         self.assertEqual(store.size(), 1)
         self.assertEqual(store.get(key)[0], "asd")
         self.assertEqual(store.get(key), None)
         self.assertEqual(store.size(), 0) # Burn should have kicked in
+
+    def test_put_and_get_with_file_attachments(self):
+        store = Storage(10, self.file_path, self.db_location)
+        store.clear()
+        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
+        files = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
+        store.put_attachments(key, files)
+        print(files)
+
+        files_from_storage = store.get_attachments(key)
+        print(files_from_storage)
+        self.assertEqual(sorted(files_from_storage), sorted(files))
+
+    def test_delete_with_file_attachments(self):
+        store = Storage(10, self.file_path, self.db_location)
+        store.clear()
+        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
+        files = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
+        store.put_attachments(key, files)
+
+        store.delete_attachments(key)
+        files_from_storage = store.get_attachments(key)
+        self.assertEqual(files_from_storage, [])
+
+    def test_get_empty_file_attachments(self):
+        store = Storage(10, self.file_path, self.db_location)
+        store.clear()
+        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
+        files_from_storage = store.get_attachments(key)
+        self.assertEqual(files_from_storage, [])
+

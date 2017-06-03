@@ -2,7 +2,7 @@ from datetime import datetime
 import math
 
 from flask import Flask, render_template, request, abort, send_from_directory
-from burn.storage import MemoryStorage
+from burn.storage import Storage
 
 app = Flask(__name__)
 
@@ -12,7 +12,8 @@ AES_CIPHER_SIZE = 128
 def init():
     capacity = app.config.get('BURN_MAX_STORAGE', 65536)
     database_file = app.config.get('BURN_DATABASE_FILE', "/dev/shm/burn.db")
-    app.storage = MemoryStorage(capacity, database_file)
+    attachment_path = app.config.get('BURN_ATTACHMENTS_PATH', "/dev/shm/burn-attachment/")    
+    app.storage = Storage(capacity, attachment_path, database_file)
 
 @app.route("/")
 def index():
@@ -26,6 +27,9 @@ def create():
     anonymize_ip = request.json["anonymize_ip"]
     burn_after_reading = request.json["burn_after_reading"]
     maxlength = app.config.get('BURN_MAX_MESSAGE_LENGTH', 2048)
+
+    print(request.json)
+
     # ciphertext padding. Guesstimated.
     ciphertext_maxlength = AES_CIPHER_SIZE - (maxlength % AES_CIPHER_SIZE) + maxlength
     # base64.
@@ -36,7 +40,12 @@ def create():
     if len(message) > ciphertext_maxlength:
         return "Message is too long. Please keep it shorter than %s characters." % maxlength, 403
 
-    _id = app.storage.put(message, expiry, anonymize_ip, request.remote_addr, burn_after_reading=burn_after_reading)
+    _id = app.storage.put(message, expiry, anonymize_ip, request.remote_addr,
+                          burn_after_reading=burn_after_reading)
+
+    if request.json["files"]:
+        app.storage.put_attachments(_id, request.json["files"])
+
     return str(_id)
 
 @app.route("/<uuid:token>", methods=["DELETE"])
@@ -45,13 +54,14 @@ def delete(token):
     return "ok"
 
 @app.route("/<uuid:token>", methods=["GET"])
-def fetch(token):    
+def fetch(token):
     ret = app.storage.get(token, request.remote_addr)
 
     if not ret:
         return abort(404)
-        
+
     visitors = app.storage.list_visitors(token)
+    files = app.storage.get_attachments(token)
     unique_visitors = set([v[0] for v in visitors])
 
     aliased_visitors = list()
@@ -67,7 +77,7 @@ def fetch(token):
         aliased_visitors.append((alias_dictionary[identifier], time))
 
     msg, expiry, anonymize_ip_salt, burn_after_reading = ret
-    return render_template("open.html", msg=msg, expiry=expiry,
+    return render_template("open.html", msg=msg, expiry=expiry, files=files,
                            visitors=aliased_visitors, burn_after_reading=burn_after_reading,
                            unique_visitors=len(unique_visitors),
                            anonymous=(anonymize_ip_salt != None))
@@ -83,3 +93,7 @@ def page_not_found(e):
 @app.route("/robots.txt")
 def robots():
     return send_from_directory(app.static_folder, 'robots.txt')
+
+@app.before_request
+def before_request():
+    app.storage.expire()

@@ -1,4 +1,30 @@
-var module = angular.module('burn', []);
+var module = angular.module('burn', [], function($compileProvider) {
+  $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|data):/);
+});
+
+var files = [];
+
+function readFiles(target_files) {
+  // Clear old files
+  files = [];
+  console.log(target_files);
+
+  for(var i = 0; i < target_files.length; ++i) {
+    var file = target_files[i];
+    if (!file) {
+      return;
+    }
+
+    (function(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var contents = e.target.result;
+        files.push({ filename: file.name, binary: btoa(contents) });
+      };
+      reader.readAsBinaryString(file);
+    })(file);
+  }
+}
 
 module.factory('_feedback', [function() {
   return function(scope, status, reason) {
@@ -72,28 +98,40 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
       expiry_time += 1000*60*60*24*7;
     }
 
-    feedback("info", "encrypting...");
-    var rp = {};
-    message = sjcl.encrypt(password, message, {}, rp);
-    console.log(message)    
-    message = JSON.stringify(message);
+    feedback("info", "encrypting...")
+    var rp = {}
+    message = sjcl.encrypt(password, message, {}, rp)
+    console.log(message)        
+    message = JSON.stringify(message)
     console.log(message.length)
-    password = rp.key;
+    password = rp.key
 
-    feedback("info", "sending to server...");
+    encrypted_files = [];
+    console.log(files.length)
+    if(files) {
+      feedback("info", "encrypting files...")
+      for(var i = 0; i < files.length; i += 1) {        
+        json_file = JSON.stringify(files[i])        
+        encrypted_file = sjcl.encrypt(password, json_file, {}, {})
+        encrypted_files.push(encrypted_file)        
+      }
+    }
+
+    feedback("info", "sending to server...")
 
     $http.post("/create", {
       message: message,
       expiry: expiry_time,
       anonymize_ip: $scope.anonymize_ip,
       burn_after_reading: $scope.burn_after_reading,
+      files: encrypted_files,
     })
     .success(function(data) {
       step2(data, password);
     })
     .error(function(data) {
       feedback("error flash", data);
-    });
+    })
   };
 }]);
 
@@ -112,28 +150,39 @@ module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $
     return newDate;
   }
 
+  var _decrypt = function(password) {
+      $scope.decrypted_files = [];
+      var message = document.getElementById("themessage").value;
+
+      message = JSON.parse(message)
+      $scope.decrypted = sjcl.decrypt(password, message)
+
+      $scope.decrypted_files = []
+      var encrypted_files = document.getElementsByName("files")
+      for(var i = 0; i < encrypted_files.length; i += 1) {
+        feedback("info", "decrypting file " + (i + 1));
+        var encrypted_file = encrypted_files[i].value
+        console.log(encrypted_file)
+        var decrypted_file = JSON.parse(sjcl.decrypt(password, encrypted_file))
+        console.log(decrypted_file)
+        $scope.decrypted_files.push(decrypted_file)
+      }
+  }
+
   var decrypt = function(password) {
 
     feedback("info", "decrypting...");
 
+    var fixed = document.getElementById("expiry").value.replace(" ","T");
+    var date = convertDate(fixed);
+    $scope.expiry = date.toLocaleString();
+
     try {
-      // console.log(id);
-      // console.log(password);
-
-      var fixed = document.getElementById("expiry").value.replace(" ","T");
-      var date = convertDate(fixed);
-
-      $scope.expiry = date.toLocaleString();
-
-      var message = document.getElementById("themessage").value;
-      // console.log(message);
-      // var debased = JSON.parse(message);
-      message = JSON.parse(message);
-      $scope.decrypted = sjcl.decrypt(password, message);
+      _decrypt(password);
     } catch(err) {
       // Try the base64 decoded, just in case the user copy pasted the url password.
       try {
-        $scope.decrypted = sjcl.decrypt(sjcl.codec.base64url.toBits(password), message);       
+        _decrypt(sjcl.codec.base64url.toBits(password));
       } catch(err) {
         feedback("error", "Failed to decrypt. Please provide the correct password.");
         console.log(err);
@@ -150,9 +199,9 @@ module.controller("OpenCtl", ['$scope', '$http', '_feedback', function($scope, $
   $scope.copy = function() {
     document.getElementById("thebox").select();
     if(document.execCommand('copy')) {
-      feedback("info", "The message has been copied to your clipboard.")
+      feedback("info", "The URL has been copied to your clipboard.")
     } else {
-      feedback("error", "Could not copy the message to your keyboard, your browser may not support this feature.")
+      feedback("error", "Could not copy the URL to your keyboard, your browser may not support this feature.")
     }    
   };
 

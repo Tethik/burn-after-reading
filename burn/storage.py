@@ -1,16 +1,21 @@
+import os
 import sqlite3
 import uuid
 from datetime import datetime
 import hashlib
 
-class MemoryStorage(object):
+class Storage(object):
     def set_capacity(self, capacity):
-        self.capacity = capacity        
-
-    def __init__(self, capacity, database_file):
-        self.db = database_file
         self.capacity = capacity
-        self.conn = sqlite3.connect(self.db)
+
+    def __init__(self, capacity, attachment_path, database_file):
+        try:
+            os.makedirs(attachment_path)
+        except:
+            pass
+        self.attachment_path = attachment_path
+        self.capacity = capacity
+        self.conn = sqlite3.connect(database_file)
         c = self.conn.cursor()
         c.execute("PRAGMA foreign_keys = ON")
         c.execute("""create table if not exists storage (
@@ -30,14 +35,18 @@ class MemoryStorage(object):
                 FOREIGN KEY(storage_key) REFERENCES storage(key)
                     ON DELETE CASCADE
             )""")
+        c.execute("""
+            create table if not exists file_attachments (
+                storage_key NVARCHAR(100),
+                path NVARCHAR(256),                
+                FOREIGN KEY(storage_key) REFERENCES storage(key)
+                    ON DELETE CASCADE
+            )""")
         self.conn.commit()
-
-        # Expire on every new object creation => so every request.
-        self.expire()
 
     def _add_visited_log(self, c, key, ip, creator, salt):
         if ip != None:
-            if salt != None:                
+            if salt != None:
                 ip = hashlib.sha256((salt + ip).encode()).hexdigest()
             c.execute("""
              INSERT INTO visitors (storage_key, ip, visited, creator)
@@ -76,32 +85,35 @@ class MemoryStorage(object):
 
     def put(self, value, expiry, anonymize_ip=True, ip=None, burn_after_reading=False):
         c = self.conn.cursor()
-        # Enforce capacity by removing the oldest entry
+        # Enforce capacity by removing the oldest entry. Todo: remove this and abort instead.
         if self.size() >= self.capacity:
             c.execute("""
-                DELETE FROM storage
-                WHERE created = (SELECT MIN(created) FROM storage)
-                """)
+            DELETE FROM storage
+            WHERE created = (SELECT MIN(created) FROM storage)
+            """)
         key = uuid.uuid4()
         salt = None
         if anonymize_ip:
             salt = str(uuid.uuid4())
         c.execute("""
             INSERT INTO storage (key, value, expiry, created, anonymize_ip_salt, burn_after_reading)
-            VALUES (?, ?, ?, ?, ?, ?)""", (str(key), value, expiry, datetime.utcnow(), salt, burn_after_reading))
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, (str(key), value, expiry, datetime.utcnow(), salt, burn_after_reading))
 
-        self._add_visited_log(c, key, ip, 1, salt)
+        self._add_visited_log(c, key, ip, True, salt)
         self.conn.commit()
         return key
 
     def delete(self, key):
         c = self.conn.cursor()
+        # self.delete_files(key)
         c.execute("DELETE FROM storage WHERE key = ?", (str(key),))
         self.conn.commit()
 
     def clear(self):
         c = self.conn.cursor()
         c.execute("DELETE FROM storage")
+        self.clear_attachments()
         self.conn.commit()
 
     def size(self):
@@ -113,3 +125,46 @@ class MemoryStorage(object):
         c = self.conn.cursor()
         c.execute("DELETE FROM storage WHERE expiry < ?", (datetime.utcnow(), ))
         self.conn.commit()
+
+    def get_attachments(self, key):
+        c = self.conn.cursor()
+        res = c.execute("""
+            SELECT path FROM file_attachments
+            WHERE storage_key = ?
+            """, (str(key),))
+        files = []
+        for row in res:
+            with open(row[0]) as _file:
+                files.append(_file.read())
+        return files
+
+    def put_attachments(self, storage_key, file_array):
+        c = self.conn.cursor()
+        # Write the files.
+        for file_content in file_array:
+            path = os.path.join(self.attachment_path, str(uuid.uuid4()))
+            with open(path, "w") as _file:
+                _file.write(file_content)
+
+            # Save to db
+            c.execute("""
+                INSERT INTO file_attachments (storage_key, path)
+                VALUES (?, ?)
+                """, (str(storage_key), path))
+        self.conn.commit()
+
+    def delete_attachments(self, key):
+        c = self.conn.cursor()
+        c.execute("SELECT path FROM file_attachments WHERE storage_key = ?", (str(key),))
+        res = c.fetchall()
+        for row in res:
+            os.remove(row[0])
+        c.execute("DELETE FROM file_attachments WHERE storage_key = ?", (str(key),))
+        self.conn.commit()
+    
+    def clear_attachments(self):
+        c = self.conn.cursor()
+        c.execute("DELETE FROM file_attachments")
+        self.conn.commit()
+        for path in os.listdir(self.attachment_path):
+            os.remove(path)
