@@ -139,11 +139,12 @@ class TestStorage(TestCase):
         key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
         files = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
         store.put_attachments(key, files)
-        print(files)
 
         files_from_storage = store.get_attachments(key)
-        print(files_from_storage)
-        self.assertEqual(sorted(files_from_storage), sorted(files))
+        self.assertEqual(len(files_from_storage), len(files))
+        for _f in files_from_storage:
+            content = store.get_attachment(_f)
+            self.assertIn(content, files)
 
     def test_delete_with_file_attachments(self):
         store = Storage(10, self.file_path, self.db_location)
@@ -162,4 +163,14 @@ class TestStorage(TestCase):
         key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
         files_from_storage = store.get_attachments(key)
         self.assertEqual(files_from_storage, [])
+
+    def test_clear_also_removes_files(self):
+        store = Storage(10, self.file_path, self.db_location)
+        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
+        files = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
+        store.put_attachments(key, files)
+        self.assertGreater(len(os.listdir(self.file_path)), 0)
+        store.clear()
+        self.assertEqual(len(os.listdir(self.file_path)), 0)
+
 

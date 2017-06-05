@@ -55,6 +55,10 @@
   </div>
 
    <div id="step2" ng-show="step == 2">
+      <p>Please wait while your browser encrypts your message and then sends it to the server.</p>   
+   </div>
+
+   <div id="step3" ng-show="step == 3">
      <p>Your message has been encrypted and stored. Here is the url which you need to share the message:</p>     
      <input type="text" onclick="this.select();" name="url" ng-model="share_url" class="u-full-width" id="theurlbox" readonly>
      <button class="button-copy" ng-click="copy()">copy</button>

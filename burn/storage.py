@@ -38,7 +38,7 @@ class Storage(object):
         c.execute("""
             create table if not exists file_attachments (
                 storage_key NVARCHAR(100),
-                path NVARCHAR(256),                
+                key NVARCHAR(100),                
                 FOREIGN KEY(storage_key) REFERENCES storage(key)
                     ON DELETE CASCADE
             )""")
@@ -105,8 +105,8 @@ class Storage(object):
         return key
 
     def delete(self, key):
+        self.delete_attachments(key)
         c = self.conn.cursor()
-        # self.delete_files(key)
         c.execute("DELETE FROM storage WHERE key = ?", (str(key),))
         self.conn.commit()
 
@@ -126,45 +126,53 @@ class Storage(object):
         c.execute("DELETE FROM storage WHERE expiry < ?", (datetime.utcnow(), ))
         self.conn.commit()
 
+    def get_attachment(self, key):
+        path = os.path.join(self.attachment_path, str(key))
+        with open(path) as _file:
+            content = _file.read()
+        return content
+
     def get_attachments(self, key):
         c = self.conn.cursor()
         res = c.execute("""
-            SELECT path FROM file_attachments
+            SELECT key FROM file_attachments
             WHERE storage_key = ?
             """, (str(key),))
-        files = []
-        for row in res:
-            with open(row[0]) as _file:
-                files.append(_file.read())
+
+        files = [row[0] for row in res]
         return files
 
     def put_attachments(self, storage_key, file_array):
         c = self.conn.cursor()
         # Write the files.
         for file_content in file_array:
-            path = os.path.join(self.attachment_path, str(uuid.uuid4()))
+            key = str(uuid.uuid4())
+            path = os.path.join(self.attachment_path, key)
             with open(path, "w") as _file:
                 _file.write(file_content)
 
             # Save to db
             c.execute("""
-                INSERT INTO file_attachments (storage_key, path)
+                INSERT INTO file_attachments (storage_key, key)
                 VALUES (?, ?)
-                """, (str(storage_key), path))
+                """, (str(storage_key), key))
         self.conn.commit()
 
     def delete_attachments(self, key):
         c = self.conn.cursor()
-        c.execute("SELECT path FROM file_attachments WHERE storage_key = ?", (str(key),))
+        c.execute("SELECT key FROM file_attachments WHERE storage_key = ?", (str(key),))
         res = c.fetchall()
         for row in res:
-            os.remove(row[0])
+            path = os.path.join(self.attachment_path, row[0])
+            os.remove(path)
         c.execute("DELETE FROM file_attachments WHERE storage_key = ?", (str(key),))
         self.conn.commit()
-    
+
     def clear_attachments(self):
         c = self.conn.cursor()
         c.execute("DELETE FROM file_attachments")
         self.conn.commit()
-        for path in os.listdir(self.attachment_path):
+        for key in os.listdir(self.attachment_path):
+            path = os.path.join(self.attachment_path, key)
             os.remove(path)
+        

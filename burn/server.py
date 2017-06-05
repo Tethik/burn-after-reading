@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import math
+import logging
 
-from flask import Flask, render_template, request, abort, send_from_directory
+from flask import Flask, render_template, request, abort, send_from_directory, jsonify
 from burn.storage import Storage
 
 app = Flask(__name__)
@@ -12,7 +13,7 @@ AES_CIPHER_SIZE = 128
 def init():
     capacity = app.config.get('BURN_MAX_STORAGE', 65536)
     database_file = app.config.get('BURN_DATABASE_FILE', "/dev/shm/burn.db")
-    attachment_path = app.config.get('BURN_ATTACHMENTS_PATH', "/dev/shm/burn-attachment/")    
+    attachment_path = app.config.get('BURN_ATTACHMENTS_PATH', "/dev/shm/burn-attachment/")
     app.storage = Storage(capacity, attachment_path, database_file)
 
 @app.route("/")
@@ -23,12 +24,17 @@ def index():
 @app.route("/create", methods=["POST"])
 def create():
     message = request.json["message"]
-    expiry = datetime.utcfromtimestamp(request.json["expiry"] / 1000)
     anonymize_ip = request.json["anonymize_ip"]
     burn_after_reading = request.json["burn_after_reading"]
+
+    max_expiry_delta = app.config.get('BURN_MAX_EXPIRY_TIME', 60*60*24*7)
+    given_expiry = datetime.utcfromtimestamp(request.json["expiry"] / 1000)
+    max_expiry = datetime.utcnow() + timedelta(seconds=max_expiry_delta)
+    expiry = min(given_expiry, max_expiry)
+
     maxlength = app.config.get('BURN_MAX_MESSAGE_LENGTH', 2048)
 
-    print(request.json)
+    logging.debug(request.json)
 
     # ciphertext padding. Guesstimated.
     ciphertext_maxlength = AES_CIPHER_SIZE - (maxlength % AES_CIPHER_SIZE) + maxlength
@@ -81,6 +87,15 @@ def fetch(token):
                            visitors=aliased_visitors, burn_after_reading=burn_after_reading,
                            unique_visitors=len(unique_visitors),
                            anonymous=(anonymize_ip_salt != None))
+
+@app.route("/attachment/<uuid:token>", methods=["GET"])
+def fetch_attachment(token):
+    ret = app.storage.get_attachment(token)
+
+    if not ret:
+        return abort(404)
+
+    return jsonify(ret)
 
 @app.route("/about")
 def about():
