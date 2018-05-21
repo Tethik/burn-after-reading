@@ -21,7 +21,7 @@ def init():
 def index():
     maxlength = app.config.get('BURN_MAX_REQUEST_SIZE', 1024*1024)
     return render_template("index.html", maxlength=maxlength)
-    
+
 
 @app.route("/create", methods=["POST"])
 def create():
