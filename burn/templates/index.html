@@ -7,13 +7,16 @@
     {{reason}}
   </div>
 
+  
 
   <div id="step1" ng-show="step == 1">
-    <label for="exampleMessage">Message ({{maxlength - message.length}} characters left)</label>
-     <textarea class="u-full-width" id="thebox" placeholder="Hi Dave …" ng-model="message" maxlength="{{maxlength}}" required></textarea>
+    
+     <label for="message">Message</label>
+     <textarea class="u-full-width" id="thebox" name="message" placeholder="Hi Dave …" ng-model="message"></textarea>
+
 
      <div class="row">
-       <div class="eight columns" style="padding-top: 6px;">
+       <!--<div class="eight columns" style="padding-top: 6px;">
            <label class="u-pull-left">
              <input type="checkbox" ng-model="generate_password">
              <span class="label-body">Create a password for me</span>
@@ -30,32 +33,51 @@
              <input type="checkbox" ng-model="burn_after_reading">
              <span class="label-body">Burn After Reading 🔥</span>
            </label>           
+       </div>-->
+    
+
+       <div class="seven columns">
+          <div class="row">
+
+            <div class="six columns">
+              <label>📎 Files</label>
+              <input class="u-full-width" id="files" type="file" onchange="angular.element(this).scope().check_filesize(this)" multiple>
+            </div>
+
+            <div class="six columns">
+            <label>🕓 Expire after</label>
+            <select name="expiry" ng-model="expiry">             
+              <option value="hour" selected>One hour</option>
+              <option value="day">One day</option>
+              <option value="week">One week</option>
+            </select>
+            </div>
+          </div>
        </div>
 
-       <div class="four columns right-align">
-           <span class="label-body">Expire after:</span>
-           <select name="expiry" ng-model="expiry">             
-             <option value="hour" selected>One hour</option>
-             <option value="day">One day</option>
-             <option value="week">One week</option>
-           </select>
-       </div>
+        <div class="five columns right-align">          
+          <label>&nbsp;</label>   
+          <span color="red" ng-show="file_bytes + used_bytes > maxlength">       
+          ⚠️ ({{file_bytes + used_bytes}} / {{maxlength}})
+          </span>
+          <span ng-show="file_bytes + used_bytes <= maxlength">       
+          ({{file_bytes + used_bytes}} / {{maxlength}})
+          </span>
+          <input class="button-primary" value="Submit" type="submit" ng-click="send(message)">        
+        </div>
      </div>
 
-     <div ng-show="!generate_password">
+     <!--<div ng-show="!generate_password">
        <label for="password">
          Password
        </label>
        <input type="text" name="password" placeholder="correcthorsebatterystaple" ng-model="user_password" class="u-full-width">
        <p>This password will be used to encrypt the message.</p>
-     </div>
-
-     <input class="button" value="Attach File" type="file" onchange="readFiles(this.files)" multiple>
-     <input class="button-primary" value="Submit" type="submit" ng-click="send(message)">
+     </div>     -->
   </div>
 
    <div id="step2" ng-show="step == 2">
-      <p>Please wait while your browser encrypts your message and then sends it to the server.</p>   
+      <p>Please wait while your message is encrypted and sent to the server.</p>   
    </div>
 
    <div id="step3" ng-show="step == 3">

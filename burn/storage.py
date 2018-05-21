@@ -4,6 +4,11 @@ import uuid
 from datetime import datetime
 import hashlib
 
+class StorageException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+        
+
 class Storage(object):
     def set_capacity(self, capacity):
         self.capacity = capacity
@@ -44,6 +49,7 @@ class Storage(object):
             )""")
         self.conn.commit()
 
+    
     def _add_visited_log(self, c, key, ip, creator, salt):
         if ip != None:
             if salt != None:
@@ -54,6 +60,7 @@ class Storage(object):
              (str(key), ip, datetime.utcnow(), creator))
             self.conn.commit()
 
+    
     def list_visitors(self, key):
         c = self.conn.cursor()
         c.execute("""
@@ -62,6 +69,7 @@ class Storage(object):
         """, (str(key),))
         return c.fetchall()
 
+    
     def get(self, key, ip=None):
         c = self.conn.cursor()
 
@@ -83,14 +91,13 @@ class Storage(object):
 
         return res
 
+    
     def put(self, value, expiry, anonymize_ip=True, ip=None, burn_after_reading=False):
         c = self.conn.cursor()
         # Enforce capacity by removing the oldest entry. Todo: remove this and abort instead.
         if self.size() >= self.capacity:
-            c.execute("""
-            DELETE FROM storage
-            WHERE created = (SELECT MIN(created) FROM storage)
-            """)
+            raise StorageException("Storage is full.")
+
         key = uuid.uuid4()
         salt = None
         if anonymize_ip:
@@ -104,34 +111,40 @@ class Storage(object):
         self.conn.commit()
         return key
 
+    
     def delete(self, key):
         self.delete_attachments(key)
         c = self.conn.cursor()
         c.execute("DELETE FROM storage WHERE key = ?", (str(key),))
         self.conn.commit()
 
+    
     def clear(self):
         c = self.conn.cursor()
         c.execute("DELETE FROM storage")
         self.clear_attachments()
         self.conn.commit()
 
+    
     def size(self):
         c = self.conn.cursor()
         c.execute("SELECT COUNT(*) FROM storage")
         return c.fetchone()[0]
 
+    
     def expire(self):
         c = self.conn.cursor()
         c.execute("DELETE FROM storage WHERE expiry < ?", (datetime.utcnow(), ))
         self.conn.commit()
 
+    
     def get_attachment(self, key):
         path = os.path.join(self.attachment_path, str(key))
         with open(path) as _file:
             content = _file.read()
         return content
 
+    
     def get_attachments(self, key):
         c = self.conn.cursor()
         res = c.execute("""
@@ -142,6 +155,7 @@ class Storage(object):
         files = [row[0] for row in res]
         return files
 
+    
     def put_attachments(self, storage_key, file_array):
         c = self.conn.cursor()
         # Write the files.
@@ -158,6 +172,7 @@ class Storage(object):
                 """, (str(storage_key), key))
         self.conn.commit()
 
+    
     def delete_attachments(self, key):
         c = self.conn.cursor()
         c.execute("SELECT key FROM file_attachments WHERE storage_key = ?", (str(key),))
@@ -168,6 +183,7 @@ class Storage(object):
         c.execute("DELETE FROM file_attachments WHERE storage_key = ?", (str(key),))
         self.conn.commit()
 
+    
     def clear_attachments(self):
         c = self.conn.cursor()
         c.execute("DELETE FROM file_attachments")

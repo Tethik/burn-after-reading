@@ -4,7 +4,7 @@ import os
 import shutil
 import uuid
 from unittest import TestCase
-from burn.storage import Storage
+from burn.storage import Storage, StorageException
 
 class TestStorage(TestCase):
 
@@ -45,8 +45,11 @@ class TestStorage(TestCase):
             self.assertEqual(store.size(), i+1)
 
         self.assertEqual(store.get(first_key)[0], "asd0")
-        store.put("asd"+str(testcapacity+1), datetime.datetime.now())
-        self.assertEqual(store.get(first_key), None)
+        try:        
+            store.put("asd"+str(testcapacity+1), datetime.datetime.now())
+            self.fail("Should raise exception")
+        except StorageException:
+            pass
 
     def test_delete(self):
         store = Storage(3, self.file_path, self.db_location)

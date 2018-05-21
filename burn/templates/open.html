@@ -22,13 +22,16 @@
 
     <div ng-show="decrypted_succesfully">
       {% raw %}      
-      <label for="message">Message</label>    
-      <textarea class="u-full-width" id="thebox" name="message" rows="6" readonly>{{decrypted}}</textarea>
-
+      
+      <div ng-show="message.length > 0">
+        <label for="message">Message</label>    
+        <textarea class="u-full-width" id="thebox" name="message" rows="6" readonly>{{decrypted}}</textarea>
+      </div>
+      
       <div ng-show="decrypted_files.length > 0">
         <b>Attachment Files</b>
         <div ng-repeat="decrypted_file in decrypted_files track by $index">
-          <a href="data:application/octet-stream;charset=utf-8;base64,{{decrypted_file.binary}}" download="{{decrypted_file.filename}}">{{decrypted_file.filename}}</a>
+          <a href="{{decrypted_file.data_url}}" download="{{decrypted_file.filename}}">{{decrypted_file.filename}}</a>
         </div>
         <hr />
       </div>
@@ -81,6 +84,4 @@
   </div>
   {% endif %}
 </form>
-
-
 {% endblock %}

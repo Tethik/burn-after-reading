@@ -16,13 +16,22 @@ def init():
     attachment_path = app.config.get('BURN_ATTACHMENTS_PATH', "/dev/shm/burn-attachment/")
     app.storage = Storage(capacity, attachment_path, database_file)
 
+
 @app.route("/")
 def index():
-    maxlength = app.config.get('BURN_MAX_MESSAGE_LENGTH', 2048)
+    maxlength = app.config.get('BURN_MAX_REQUEST_SIZE', 1024*1024)
     return render_template("index.html", maxlength=maxlength)
+    
 
 @app.route("/create", methods=["POST"])
 def create():
+    max_request_size = app.config.get('BURN_MAX_REQUEST_SIZE', 1024*1024)
+
+    logging.debug(request.json)
+
+    if request.content_length > max_request_size:
+        return "Request is too large. Please keep it shorter than %s bytes." % max_request_size, 403
+
     message = request.json["message"]
     anonymize_ip = request.json["anonymize_ip"]
     burn_after_reading = request.json["burn_after_reading"]
@@ -32,20 +41,6 @@ def create():
     max_expiry = datetime.utcnow() + timedelta(seconds=max_expiry_delta)
     expiry = min(given_expiry, max_expiry)
 
-    maxlength = app.config.get('BURN_MAX_MESSAGE_LENGTH', 2048)
-
-    logging.debug(request.json)
-
-    # ciphertext padding. Guesstimated.
-    ciphertext_maxlength = AES_CIPHER_SIZE - (maxlength % AES_CIPHER_SIZE) + maxlength
-    # base64.
-    ciphertext_maxlength = math.ceil(ciphertext_maxlength / 3) * 4
-    # sjcl metadata (iv, etc)
-    ciphertext_maxlength += AES_CIPHER_SIZE
-
-    if len(message) > ciphertext_maxlength:
-        return "Message is too long. Please keep it shorter than %s characters." % maxlength, 403
-
     _id = app.storage.put(message, expiry, anonymize_ip, request.remote_addr,
                           burn_after_reading=burn_after_reading)
 
@@ -54,10 +49,12 @@ def create():
 
     return str(_id)
 
+
 @app.route("/<uuid:token>", methods=["DELETE"])
 def delete(token):
     app.storage.delete(token)
     return "ok"
+
 
 @app.route("/<uuid:token>", methods=["GET"])
 def fetch(token):
@@ -88,6 +85,7 @@ def fetch(token):
                            unique_visitors=len(unique_visitors),
                            anonymous=(anonymize_ip_salt != None))
 
+
 @app.route("/attachment/<uuid:token>", methods=["GET"])
 def fetch_attachment(token):
     ret = app.storage.get_attachment(token)
@@ -97,17 +95,21 @@ def fetch_attachment(token):
 
     return jsonify(ret)
 
+
 @app.route("/about")
 def about():
     return render_template("about.html")
+
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html")
 
+
 @app.route("/robots.txt")
 def robots():
     return send_from_directory(app.static_folder, 'robots.txt')
+
 
 @app.before_request
 def before_request():

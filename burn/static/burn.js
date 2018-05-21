@@ -9,26 +9,18 @@ async function encrypt(password, message, options, rp) {
     return ciphertext
 }
 
-function readFiles(target_files) {
-  // Clear old files
-  files = [];
-  console.log(target_files);
-
-  for(var i = 0; i < target_files.length; ++i) {
-    var file = target_files[i];
-    if (!file) {
-      return;
-    }
-
+function read_file(file) {
+  var promise = new Promise(resolve => {
     (function(file) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var contents = e.target.result;
-        files.push({ filename: file.name, binary: btoa(contents) });
-      };
-      reader.readAsBinaryString(file);
+        var reader = new FileReader()
+        reader.onload = function(e) {
+          var contents = e.target.result
+          resolve({ filename: file.name, data_url: contents })
+        };
+        reader.readAsDataURL(file)
     })(file);
-  }
+  })
+  return promise;
 }
 
 module.factory('_feedback', [function() {
@@ -46,14 +38,15 @@ module.factory('_feedback', [function() {
   }
 }]);
 
-module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope, $http, _feedback) {
+module.controller("CreateCtl", ['$q', '$scope', '$http', '_feedback', function($q, $scope, $http, _feedback) {
   $scope.generate_password = true;
   $scope.anonymize_ip = true;
   $scope.burn_after_reading = false;
   $scope.step = 1;
   $scope.expiry = "hour";
+  $scope.message = "";
 
-  $scope.maxlength = parseInt(document.getElementById('server_says_maxlength_is').value);
+  $scope.maxlength = parseInt(document.getElementById('server_says_maxlength_is').value) * 3 / 4;
 
   var feedback = function(status, reason) {
     _feedback($scope, status, reason);
@@ -62,7 +55,6 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
   var step3 = function(storage_key, encryption_key) {
     feedback("info", "Done!");
     b64 = sjcl.codec.base64url.fromBits(encryption_key);
-    // console.log(b64);
     $scope.share_url = document.location+storage_key+"#"+b64;
     $scope.step = 3;
   };
@@ -76,12 +68,30 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
     }    
   };
 
+  $scope.check_filesize = function(input) {    
+    var files = input.files;
+    console.log(files);
+    console.log($scope.files);
+    var s = $scope.message.length;
+    for(var i = 0; i < files.length; ++i) {
+      s += files[i].size;
+    }
+    $scope.file_bytes = s;
+    try {
+      $scope.$apply();
+    } catch(e) {
+
+    }    
+  };
+  
+  $scope.check_filesize(document.getElementById('files'));
+
   $scope.send = async function(message) {
-    if(!message || message.length == 0) {
-      return feedback("info", "Type something!");
+    var files = document.getElementById('files').files;
+    if((!message || message.length == 0) && (!files || files.length == 0)) {
+      return feedback("info", "Please add a message or files to submit.");
     }
 
-    // console.log(message);
     if($scope.generate_password) {
       feedback("info", "generating a password...");
       password = sjcl.random.randomWords(8); // 32 bits per word. 8*32 = 256 bits.
@@ -91,8 +101,6 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
       }
       password = $scope.user_password;
     }
-
-    // console.log(password);
 
     var expiry_time = Date.now();
     if($scope.expiry == "hour") {
@@ -108,6 +116,7 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
 
     var rp = {}
       
+    // Encrypt initial message, (we will use the same key for the files (but not same IV!)
     message = await encrypt(password, message, {}, rp)
     // console.log(message)
     message = JSON.stringify(message)
@@ -115,20 +124,21 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
     password = rp.key
 
     encrypted_files = [];
+    
     if(files) {      
-      for(var i = 0; i < files.length; i += 1) {        
-        feedback("info", "encrypting file " + (i+1) + "...")
-        json_file = JSON.stringify(files[i])        
-        encrypted_file = encrypt(password, json_file, {}, {});         
-        encrypted_files.push(encrypted_file);
+      feedback("info", "encrypting files...")
+      for(var i = 0; i < files.length; i += 1) { 
+        encrypted_files.push(read_file(files[i]).then(function(file_content) {
+          json_file = JSON.stringify(file_content)        
+          return encrypt(password, json_file, {}, {})   
+        }))
       }
     }
 
     encrypted_files = await Promise.all(encrypted_files)
 
-    console.log(encrypted_files);
-    console.log(message);
-    
+    // console.log(encrypted_files);
+    // console.log(message);
 
     feedback("info", "sending to server...")
 
@@ -139,13 +149,16 @@ module.controller("CreateCtl", ['$scope', '$http', '_feedback', function($scope,
       burn_after_reading: $scope.burn_after_reading,
       files: encrypted_files,
     })
-    .success(function(data) {
-      step3(data, password);
-    })
-    .error(function(data) {
-      feedback("error flash", data);
-    })
+    .then(
+      function(response) {
+        step3(response.data, password);
+      },
+      function(response) {
+        feedback("error flash", response.data);
+      }
+    )
   };
+
 }]);
 
 module.controller("OpenCtl", ['$scope', '$q', '$http', '_feedback', function($scope, $q, $http, _feedback) {
@@ -178,10 +191,11 @@ module.controller("OpenCtl", ['$scope', '$q', '$http', '_feedback', function($sc
       for(var i = 0; i < encrypted_files.length; i += 1) {        
         var signal = $q.defer()
         $http.get("/attachment/"+encrypted_files[i].value)
-        .success(function(i, signal) {            
-            return function(data) {
+        .then(
+          function(i, signal) {            
+            return function(response) {
               try {
-                var encrypted_file = data       
+                var encrypted_file = response.data       
                 var decrypted_file = JSON.parse(sjcl.decrypt(password, encrypted_file))        
                 feedback("info", decrypted_file.filename + " decrypted.")
                 $scope.decrypted_files.push(decrypted_file)
@@ -244,11 +258,12 @@ module.controller("OpenCtl", ['$scope', '$q', '$http', '_feedback', function($sc
   $scope.burn = function() {
     feedback("info", "Telling server to delete the message...");
     $http.delete("/"+id)
-    .success(function() {
+    .then(
+    function() {
       feedback("info", "The message was deleted.")
       $scope.burned = true;
-    })
-    .error(function(data) {
+    },
+    function(data) {
       feedback("error", data);
     });
   };
