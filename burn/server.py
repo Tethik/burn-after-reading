@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 AES_CIPHER_SIZE = 128
 
-@app.before_first_request
+@app.before_request
 def init():
     capacity = app.config.get('BURN_MAX_STORAGE', 65536)
     database_file = app.config.get('BURN_DATABASE_FILE', "/dev/shm/burn.db")
