@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [dev-packages]
+pytest = "*"
 
 [packages]
 Flask = ">=1.0.2"
