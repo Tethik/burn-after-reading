@@ -21,11 +21,6 @@ or with gunicorn
 gunicorn burn.wsgi
 ```
 
-## Running on Heroku
-
-Running on heroku should work out of the box. Just clone the repo and push it
-to the heroku endpoint.
-
 
 ## Tech and Credits
 * [AngularJS](https://angularjs.org/)
