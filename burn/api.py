@@ -3,6 +3,7 @@ import math
 import logging
 from flask import Flask, render_template, request, abort, send_from_directory, jsonify, Blueprint, Response
 from flask import current_app as app
+import os
 
 from burn.storage import Storage
 
@@ -10,11 +11,12 @@ json_api = Blueprint('json_api', __name__)
    
 @json_api.before_request
 def before_request():
-    capacity = app.config.get('BURN_MAX_STORAGE', 65536)
-    database_file = app.config.get('BURN_DATABASE_FILE', "/dev/shm/burn.db")
-    attachment_path = app.config.get('BURN_ATTACHMENTS_PATH', "/dev/shm/burn-attachment/")
-    app.storage = Storage(capacity, attachment_path, database_file)
-    app.storage.expire() # TODO: Run this as a cronjob.
+    capacity = int(os.environ.get('BURN_MAX_STORAGE', 65536))
+    data_path = os.environ.get('BURN_DATA_PATH', "/dev/shm/burn/") 
+    database_file = os.path.join(data_path, "burn.db")
+    files_path = os.path.join(data_path, 'files/')
+    app.storage = Storage(capacity, files_path, database_file)
+    app.storage.expire()
 
 
 @json_api.route("/create", methods=["POST"])
@@ -23,7 +25,7 @@ def create():
     anonymize_ip = request.json["anonymize_ip"]
     burn_after_reading = request.json["burn_after_reading"]
 
-    max_expiry_delta = app.config.get('BURN_MAX_EXPIRY_TIME', 60*60*24*7)
+    max_expiry_delta = os.environ.get('BURN_MAX_EXPIRY_TIME', 60*60*24*7)
     given_expiry = datetime.utcfromtimestamp(request.json["expiry"] / 1000)
     max_expiry = datetime.utcnow() + timedelta(seconds=max_expiry_delta)
     expiry = min(given_expiry, max_expiry)

@@ -31,14 +31,40 @@ gunicorn burn.wsgi
 py.test
 ```
 
+## Configuration
+
+The application supports configuration through environment variables and dotenv (i.e. save a `.env` file in the directory you are running the server).
+
+Sample `.env` might look as follows.
+
+```
+
+BURN_DATA_PATH=./data/
+BURN_MAX_STORAGE=1024
+MAX_CONTENT_LENGTH=16777216
+
+```
+
+- `BURN_DATA_PATH` decides where the service should store the data. If you want to store in memory, you can use `/dev/shm`.
+- `BURN_MAX_STORAGE` decides max how many documents the service will store. This is not related to the actual disk space used, only the actual count of messages currently stored.
+- `MAX_CONTENT_LENGTH` is the max request size, roughly how big the document is allowed to be in bytes.
+
 ## Docker
 
 There's a Dockerfile included, so the project can be run as a docker container as follows.
 Still need to figure out how to set the capacity though...
 
 ```
+
 docker build . -t burn
 docker -p 80:80 run -it burn
+
+```
+
+## Testing
+
+```bash
+py.test
 ```
 
 ## Tech and Credits

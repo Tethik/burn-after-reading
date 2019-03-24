@@ -7,8 +7,8 @@ ADD Pipfile Pipfile.lock ./
 RUN pip install pipenv
 RUN pipenv install --system
 
-# Add the application code and install it as a package
-COPY . ./
+# Add the application code 
+COPY burn ./burn/
 
 # Add our default docker files (such as wsgi.py entrypoint)
 ADD docker_files/* ./
