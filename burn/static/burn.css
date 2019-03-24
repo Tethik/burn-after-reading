@@ -60,6 +60,17 @@ footer {
   text-align: right;
 }
 
-.visitor_box {
+.visitor-box {
   margin-top:25px;
+  
+}
+
+.visitor-table {
+  max-height: 500px;
+  overflow: scroll;
+}
+
+.identifier-text {
+  font-size: 6pt;
+  color: grey;
 }

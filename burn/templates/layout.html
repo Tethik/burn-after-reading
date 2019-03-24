@@ -19,21 +19,20 @@
   <script src="/static/burn.js"></script>
 </head>
 <body ng-app="burn">
-<div class="container" id="main">
-  <header>
-    <a href="/">
-      <img src="/static/flame.png">
-    </a>
-  </header>
-  <div id="content">
-    {% block body %}
+  <div class="container" id="main">
+    <header>
+      <a href="/">
+        <img src="/static/flame.png">
+      </a>
+    </header>
+    <div id="content">
+      {% block body %}
 
-    {% endblock %}
-    <footer>
-      <a href="/about">about</a>
-      <a href="https://github.com/Tethik/burn-after-reading">github</a>
-    </footer>
+      {% endblock %}
+      <footer>
+        <a href="/about">about</a>
+        <a href="https://github.com/Tethik/burn-after-reading">github</a>
+      </footer>
+    </div>
   </div>
-
-</div>
 </body>

@@ -2,6 +2,7 @@ import datetime
 from time import sleep
 import os
 import shutil
+from io import StringIO
 import uuid
 from unittest import TestCase
 from burn.storage import Storage, StorageException
@@ -16,22 +17,26 @@ class TestStorage(TestCase):
         except:
             pass
         Storage.db = self.db_location
+        
 
     def tearDown(self):
         shutil.rmtree(self.file_path)
         os.remove(self.db_location)
+        
 
-    def test_put(self):
+    def test_create(self):
         store = Storage(3, self.file_path, self.db_location)
         store.clear()
-        store.put("asd", datetime.datetime.now())
+        store.create("secret message", datetime.datetime.now(), False, "123123123")
         self.assertEqual(store.size(), 1)
+
 
     def test_get(self):
         store = Storage(3, self.file_path, self.db_location)
         store.clear()
-        key = store.put("asd", datetime.datetime.now())
-        self.assertEqual(store.get(key)[0], "asd")
+        key = store.create("secret message", datetime.datetime.now(), False, "123123123")
+        self.assertEqual(store.get(key, "127.0.0.1")["content"], "secret message")
+
 
     def test_capacity(self):
         testcapacity = 50
@@ -39,47 +44,50 @@ class TestStorage(TestCase):
         store.clear()
         first_key = None
         for i in range(testcapacity):
-            key = store.put("asd"+str(i), datetime.datetime.now())
+            key = store.create("secret message", datetime.datetime.now(), False, "123123123")
             if not first_key:
                 first_key = key
             self.assertEqual(store.size(), i+1)
 
-        self.assertEqual(store.get(first_key)[0], "asd0")
+        # self.assertEqual(store.get(first_key)[0], "asd0")
         try:        
-            store.put("asd"+str(testcapacity+1), datetime.datetime.now())
+            store.create("secret message", datetime.datetime.now(), False, "123123123")
             self.fail("Should raise exception")
         except StorageException:
             pass
 
+
     def test_delete(self):
         store = Storage(3, self.file_path, self.db_location)
         store.clear()
-        _id = store.put("asd", datetime.datetime.now())
+        _id = store.create("secret message", datetime.datetime.now(), False, "127.0.0.1")
         self.assertEqual(store.size(), 1)
         store.delete(_id)
         self.assertEqual(store.size(), 0)
-        self.assertEqual(store.get(id), None)
+        self.assertEqual(store.get(id, "127.0.0.1"), None)
+
 
     def test_expiry(self):
         store = Storage(3, self.file_path, self.db_location)
         store.clear()
         now = datetime.datetime.utcnow() + datetime.timedelta(0, 3)
-        _id = store.put("asd", now)
+        _id = store.create("secret message", now, False, "127.0.0.1")        
         self.assertEqual(store.size(), 1)
         for _ in range(100):
             store.expire()
             self.assertEqual(store.size(), 1)
-            self.assertNotEqual(store.get(_id), None)
+            self.assertNotEqual(store.get(_id, "127.0.0.1"), None)
         sleep(3)
         store.expire()
         self.assertEqual(store.size(), 0)
-        self.assertEqual(store.get(_id), None)
+        self.assertEqual(store.get(_id, "127.0.0.1"), None)
+
 
     def test_sqli(self):
         store = Storage(3, self.file_path, self.db_location)
-        store.put("asd", datetime.datetime.now())
-        store.put("asd", datetime.datetime.now())
-        self.assertEqual(store.get("asd' UNION SELECT * FROM lulz"), None)
+        store.create("secret message", datetime.datetime.now(), False, "127.0.0.1")
+        store.create("secret message", datetime.datetime.now(), False, "127.0.0.2")
+        self.assertEqual(store.get("asd' UNION SELECT * FROM lulz", "127.0.0.1"), None)
 
     # def test_capacity_actual_size(self):
     #     try:
@@ -108,7 +116,7 @@ class TestStorage(TestCase):
     def test_visitor_log_delete(self):
         store = Storage(3, self.file_path, self.db_location)
         store.clear()
-        key = store.put("asd", datetime.datetime.utcnow() + datetime.timedelta(0, 3),
+        key = store.create("secret message", datetime.datetime.utcnow() + datetime.timedelta(0, 3),
                         False, "127.0.0.1")
         visitors = store.list_visitors(key)
         self.assertEqual(visitors[0][0], "127.0.0.1")
@@ -121,57 +129,27 @@ class TestStorage(TestCase):
         store.delete(key)
         self.assertEqual(store.list_visitors(key), [])
 
+    
     def test_get_non_existent(self):
         uid = str(uuid.uuid4())
         store = Storage(3, self.file_path, self.db_location)
         store.clear()
         store.get(uid, "127.0.0.2")
 
+    
     def test_burn_after_reading(self):
         store = Storage(3, self.file_path, self.db_location)
         store.clear()
-        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
+        key = store.create("secret message", datetime.datetime.now(), False, "127.0.0.1", burn_after_reading=True)
         self.assertEqual(store.size(), 1)
-        self.assertEqual(store.get(key)[0], "asd")
-        self.assertEqual(store.get(key), None)
+        self.assertNotEqual(store.get(key, "127.0.0.1"), None)
+        self.assertEqual(store.get(key, "127.0.0.1"), None)
         self.assertEqual(store.size(), 0) # Burn should have kicked in
 
-    def test_put_and_get_with_file_attachments(self):
-        store = Storage(10, self.file_path, self.db_location)
-        store.clear()
-        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
-        files = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
-        store.put_attachments(key, files)
-
-        files_from_storage = store.get_attachments(key)
-        self.assertEqual(len(files_from_storage), len(files))
-        for _f in files_from_storage:
-            content = store.get_attachment(_f)
-            self.assertIn(content, files)
-
-    def test_delete_with_file_attachments(self):
-        store = Storage(10, self.file_path, self.db_location)
-        store.clear()
-        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
-        files = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
-        store.put_attachments(key, files)
-
-        store.delete_attachments(key)
-        files_from_storage = store.get_attachments(key)
-        self.assertEqual(files_from_storage, [])
-
-    def test_get_empty_file_attachments(self):
-        store = Storage(10, self.file_path, self.db_location)
-        store.clear()
-        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
-        files_from_storage = store.get_attachments(key)
-        self.assertEqual(files_from_storage, [])
 
     def test_clear_also_removes_files(self):
         store = Storage(10, self.file_path, self.db_location)
-        key = store.put("asd", datetime.datetime.now(), burn_after_reading=True)
-        files = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
-        store.put_attachments(key, files)
+        key = store.create("secret message", datetime.datetime.now(), False, "127.0.0.1", burn_after_reading=True)                
         self.assertGreater(len(os.listdir(self.file_path)), 0)
         store.clear()
         self.assertEqual(len(os.listdir(self.file_path)), 0)

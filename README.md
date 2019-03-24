@@ -9,10 +9,8 @@ crypto where the key is shared via the url hash.
 
 Python version: 3
 
-Install requirements found in requirements.txt via
-
 ```
-pip install -r requirements.txt
+pipenv install
 ```
 
 You can either start the server locally by running
@@ -27,7 +25,8 @@ or with gunicorn
 gunicorn burn.wsgi
 ```
 
-## Testing 
+## Testing
+
 ```bash
 py.test
 ```

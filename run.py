@@ -1,7 +1,11 @@
 from burn.server import app
+import logging
 
-app.config["BURN_DATABASE_FILE"] = '/dev/shm/tmp123-burn.db'
-app.config["BURN_MAX_MESSAGE_LENGTH"] = 512
+
+logging.basicConfig(level=logging.DEBUG)
+
+app.config["BURN_DATABASE_FILE"] = './burn.db'
+app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 10
 app.config["BURN_MAX_STORAGE"] = 1024
 
 if __name__ == "__main__":

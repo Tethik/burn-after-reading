@@ -1,90 +1,97 @@
-{% extends "layout.html" %}
-{% block body %}
+{% extends "layout.html" %} {% block body %}
 <form ng-controller="CreateCtl">
-  <input type="hidden" id="server_says_maxlength_is" value="{{maxlength}}">
+  <input type="hidden" id="server_says_maxlength_is" value="{{ maxlength }}" />
   {% raw %}
-  <div id="statusbox" ng-show="status" class="msg {{status}}">
-    {{reason}}
+  <div id="statusbox" ng-show="status" class="msg {{ status }}">
+    {{ reason }}
   </div>
 
-  
-
   <div id="step1" ng-show="step == 1">
-    
-     <label for="message">Message</label>
-     <textarea class="u-full-width" id="thebox" name="message" placeholder="Hi Dave …" ng-model="message"></textarea>
+    <label for="message"
+      >Message
+      <span color="red" ng-show="file_bytes + used_bytes > maxlength">
+        (⚠️ ({{ file_bytes + used_bytes }} / {{ maxlength }}))
+      </span>
+      <span ng-show="file_bytes + used_bytes <= maxlength">
+        ({{ file_bytes + used_bytes }} / {{ maxlength }})
+      </span>
+    </label>
+    <textarea
+      class="u-full-width"
+      id="thebox"
+      name="message"
+      placeholder="Hi Dave …"
+      ng-model="message"
+    ></textarea>
 
+    <div class="row">
+      <div class="nine columns">
+        <div class="row">
+          <div class="five columns">
+            <label>📎 Files (experimental)</label>
+            <input
+              class="u-full-width"
+              id="files"
+              type="file"
+              onchange="angular.element(this).scope().check_filesize(this)"
+              multiple
+            />
+          </div>
 
-     <div class="row">
-       <!--<div class="eight columns" style="padding-top: 6px;">
-           <label class="u-pull-left">
-             <input type="checkbox" ng-model="generate_password">
-             <span class="label-body">Create a password for me</span>
-           </label>
-
-           <label class="u-pull-left">
-             &nbsp;
-             <input type="checkbox" ng-model="anonymize_ip">
-             <span class="label-body">Anonymize visitor log</span>
-           </label>
-
-            <label class="u-pull-left">
-             &nbsp;             
-             <input type="checkbox" ng-model="burn_after_reading">
-             <span class="label-body">Burn After Reading 🔥</span>
-           </label>           
-       </div>-->
-    
-
-       <div class="seven columns">
-          <div class="row">
-
-            <div class="six columns">
-              <label>📎 Files</label>
-              <input class="u-full-width" id="files" type="file" onchange="angular.element(this).scope().check_filesize(this)" multiple>
-            </div>
-
-            <div class="six columns">
+          <div class="three columns">
             <label>🕓 Expire after</label>
-            <select name="expiry" ng-model="expiry">             
+            <select name="expiry" ng-model="expiry">
               <option value="hour" selected>One hour</option>
               <option value="day">One day</option>
               <option value="week">One week</option>
             </select>
+          </div>
+
+          <div class="four columns">
+            <div>
+              <input type="checkbox" ng-model="anonymize_ip" />
+              <span class="label-body" tooltip="Anonymize visitor log">🕵️</span>
+            </div>
+
+            <div>
+              <input type="checkbox" ng-model="burn_after_reading" />
+              <span class="label-body" tooltip="Burn After Reading">🔥</span>
             </div>
           </div>
-       </div>
-
-        <div class="five columns right-align">          
-          <label>&nbsp;</label>   
-          <span color="red" ng-show="file_bytes + used_bytes > maxlength">       
-          ⚠️ ({{file_bytes + used_bytes}} / {{maxlength}})
-          </span>
-          <span ng-show="file_bytes + used_bytes <= maxlength">       
-          ({{file_bytes + used_bytes}} / {{maxlength}})
-          </span>
-          <input class="button-primary" value="Submit" type="submit" ng-click="send(message)">        
         </div>
-     </div>
+      </div>
 
-     <!--<div ng-show="!generate_password">
-       <label for="password">
-         Password
-       </label>
-       <input type="text" name="password" placeholder="correcthorsebatterystaple" ng-model="user_password" class="u-full-width">
-       <p>This password will be used to encrypt the message.</p>
-     </div>     -->
+      <div class="three columns right-align">
+        <input
+          class="button-primary"
+          value="Submit"
+          type="submit"
+          ng-click="send(message)"
+        />
+      </div>
+    </div>
   </div>
 
-   <div id="step2" ng-show="step == 2">
-      <p>Please wait while your message is encrypted and sent to the server.</p>   
-   </div>
+  <div id="step2" ng-show="step == 2">
+    <p>Please wait while your message is encrypted and sent to the server.</p>
+  </div>
 
-   <div id="step3" ng-show="step == 3">
-     <p>Your message has been encrypted and stored. Here is the url which you need to share the message:</p>     
-     <input type="text" onclick="this.select();" name="url" ng-model="share_url" class="u-full-width" id="theurlbox" readonly>
-     <button class="button-copy" ng-click="copy()">copy</button>
-   </div>
-   {% endraw %}
+  <div id="step3" ng-show="step == 3">
+    <p>
+      Your message has been encrypted and stored. Here is the url which you need
+      to share the message:
+    </p>
+    <input
+      type="text"
+      onclick="this.select();"
+      name="url"
+      ng-model="share_url"
+      class="u-full-width"
+      id="theurlbox"
+      readonly
+    />
+    <button class="button-copy" ng-click="copy()">copy</button>
+  </div>
+  {% endraw %}
 </form>
 {% endblock %}
