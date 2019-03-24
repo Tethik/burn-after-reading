@@ -149,7 +149,7 @@ class TestStorage(TestCase):
 
     def test_clear_also_removes_files(self):
         store = Storage(10, self.file_path, self.db_location)
-        key = store.create("secret message", datetime.datetime.now(), False, "127.0.0.1", burn_after_reading=True)                
+        store.create("secret message", datetime.datetime.now(), False, "127.0.0.1", burn_after_reading=True)                
         self.assertGreater(len(os.listdir(self.file_path)), 0)
         store.clear()
         self.assertEqual(len(os.listdir(self.file_path)), 0)
