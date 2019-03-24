@@ -169,9 +169,12 @@ class Storage(object):
 
     def expire(self):
         c = self.conn.cursor()
-        date = datetime.utcnow()
+        date = datetime.utcnow()        
         res = c.execute("SELECT path FROM storage WHERE expiry < ?", (date,))
-        for row in res.fetchall():
+        rows = res.fetchall()        
+        logger.info(f'Expiring {len(rows)} documents from the storage')
+        for row in rows:
+            logger.info(f'Deleting {row[0]}')
             self._remove_file(row[0])
         c.execute("DELETE FROM storage WHERE expiry < ?", (date,))
         self.conn.commit()

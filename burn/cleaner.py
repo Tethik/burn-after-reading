@@ -1,5 +1,6 @@
 from .storage import Storage 
 import os
+import logging
 
 def main():
     capacity = os.environ.get('BURN_MAX_STORAGE', 65536)
@@ -9,4 +10,5 @@ def main():
     store.expire() 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     main()

@@ -5,11 +5,13 @@ name = "pypi"
 
 [packages]
 flask = "*"
+python-dotenv = "*"
 
 [dev-packages]
 pylint = "*"
 pytest = "*"
 pytest-cov = "*"
+rope = "*"
 
 [requires]
 python_version = "3.6"

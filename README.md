@@ -38,7 +38,7 @@ Still need to figure out how to set the capacity though...
 
 ```
 docker build . -t burn
-docker -p 80:80 run -t burn
+docker -p 80:80 run -it burn
 ```
 
 ## Tech and Credits
