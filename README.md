@@ -7,7 +7,7 @@ crypto where the key is shared via the url hash.
 
 ## Running locally
 
-Python version: 3
+Python version: 3.6
 
 ```
 pipenv install
@@ -31,9 +31,19 @@ gunicorn burn.wsgi
 py.test
 ```
 
+## Docker
+
+There's a Dockerfile included, so the project can be run as a docker container as follows.
+Still need to figure out how to set the capacity though...
+
+```
+docker build . -t burn
+docker -p 80:80 run -t burn
+```
+
 ## Tech and Credits
 
-- [AngularJS](https://angularjs.org/)
+- [AngularJS 1](https://angularjs.org/)
 - [SJCL](https://bitwiseshiftleft.github.io/sjcl/)
 - [Flask](http://flask.pocoo.org/)
 - [skeleton css framework](http://getskeleton.com)
