@@ -58,3 +58,5 @@ target/
 
 deploy
 .pytest_cache/
+data
+.env
