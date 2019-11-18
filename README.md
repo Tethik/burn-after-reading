@@ -38,11 +38,9 @@ The application supports configuration through environment variables and dotenv 
 Sample `.env` might look as follows.
 
 ```
-
 BURN_DATA_PATH=./data/
 BURN_MAX_STORAGE=1024
 MAX_CONTENT_LENGTH=16777216
-
 ```
 
 - `BURN_DATA_PATH` decides where the service should store the data. If you want to store in memory, you can use `/dev/shm`.
@@ -55,10 +53,8 @@ There's a Dockerfile included, so the project can be run as a docker container a
 Still need to figure out how to set the capacity though...
 
 ```
-
 docker build . -t burn
-docker -p 80:80 run -it burn
-
+docker run -p 80:80 -it burn
 ```
 
 ## Testing
