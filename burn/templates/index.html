@@ -16,13 +16,7 @@
         ({{ file_bytes + used_bytes }} / {{ maxlength }})
       </span>
     </label>
-    <textarea
-      class="u-full-width"
-      id="thebox"
-      name="message"
-      placeholder="Hi Dave …"
-      ng-model="message"
-    ></textarea>
+    <textarea class="u-full-width" id="thebox" name="message" placeholder="Hi Dave …" ng-model="message"></textarea>
 
     <div class="row">
       <div class="nine columns">
@@ -59,9 +53,7 @@
 
             <div>
               <input type="checkbox" ng-model="burn_after_reading" />
-              <span
-                class="label-body"
-                title="The message will be deleted by the server after the first read."
+              <span class="label-body" title="The message will be deleted by the server after the first read."
                 >🔥 Burn After Reading</span
               >
             </div>
@@ -70,12 +62,9 @@
       </div>
 
       <div class="three columns right-align">
-        <input
-          class="button-primary"
-          value="Submit"
-          type="submit"
-          ng-click="send(message)"
-        />
+        <button class="button-create" ng-click="send(message)">
+          Create
+        </button>
       </div>
     </div>
   </div>
@@ -86,8 +75,7 @@
 
   <div id="step3" ng-show="step == 3">
     <p>
-      Your message has been encrypted and stored. Here is the url which you need
-      to share the message:
+      Your message has been encrypted and stored. Here is the url which you need to share the message:
     </p>
     <input
       type="text"

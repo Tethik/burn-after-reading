@@ -16,9 +16,9 @@ footer {
 
 #content {
   padding: 40px;
-  border: 1px solid #95A5A6;
-  background-color: #ECECEC;
-  box-shadow: 4px 4px #95A5A6;
+  border: 1px solid #95a5a6;
+  background-color: #ececec;
+  box-shadow: 4px 4px #95a5a6;
   margin-bottom: 50px;
 }
 
@@ -27,8 +27,12 @@ footer {
 }
 
 @keyframes flash {
-  50% {opacity:0;}
-  100% {opacity:1;}
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .flash {
@@ -36,11 +40,11 @@ footer {
 }
 
 .msg {
-   background-color: #4183D7;
-   border-radius: 5px;
-   padding: 5px;
-   margin-bottom: 15px;
-   padding-left: 10px;
+  background-color: #f5cf87;
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 15px;
+  padding-left: 10px;
 }
 
 .warning {
@@ -52,8 +56,19 @@ footer {
 }
 
 .button-burn {
-  background-color: #C75C5C;
+  background-color: #c75c5c;
   color: #f5cf87;
+}
+
+.button-create,
+.button-copy {
+  background-color: #f5cf87;
+  color: #c75c5c;
+}
+
+.button-create:hover,
+.button-copy:hover {
+  color: #c75c5c;
 }
 
 .right-align {
@@ -61,8 +76,7 @@ footer {
 }
 
 .visitor-box {
-  margin-top:25px;
-  
+  margin-top: 25px;
 }
 
 .visitor-table {
@@ -73,4 +87,9 @@ footer {
 .identifier-text {
   font-size: 6pt;
   color: grey;
+}
+
+a,
+a:hover {
+  color: #c75c5c;
 }
