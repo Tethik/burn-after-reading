@@ -50,12 +50,20 @@
           <div class="four columns">
             <div>
               <input type="checkbox" ng-model="anonymize_ip" />
-              <span class="label-body" tooltip="Anonymize visitor log">🕵️</span>
+              <span
+                class="label-body"
+                title="If ticked each visitor's IP address will be hashed before being saved in the database."
+                >🕵️ Anonymize Visitors</span
+              >
             </div>
 
             <div>
               <input type="checkbox" ng-model="burn_after_reading" />
-              <span class="label-body" tooltip="Burn After Reading">🔥</span>
+              <span
+                class="label-body"
+                title="The message will be deleted by the server after the first read."
+                >🔥 Burn After Reading</span
+              >
             </div>
           </div>
         </div>
