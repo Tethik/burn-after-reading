@@ -2,11 +2,15 @@ import os
 import sqlite3
 import uuid
 from datetime import datetime
-import hashlib
 import shutil
 import logging
+import hmac
+import secrets
+import hashlib
 
 logger = logging.getLogger("storage")
+
+ANONYMIZATION_SECURITY_BYTES = 32  # 256 bits
 
 
 class StorageException(Exception):
@@ -48,7 +52,8 @@ class Storage(object):
 
     def _add_visited_log(self, c, key, ip, creator, salt):
         if salt != None:
-            ip = hashlib.sha256((salt + ip).encode()).hexdigest()
+            ip = hmac.new(salt, ip.encode("ascii"),
+                          digestmod=hashlib.sha256).hexdigest()
         c.execute(
             """
             INSERT INTO visitors (storage_key, ip, visited, creator)
@@ -117,7 +122,7 @@ class Storage(object):
         key = str(uuid.uuid4())
         salt = None
         if anonymize_ip:
-            salt = str(uuid.uuid4())
+            salt = secrets.token_bytes(ANONYMIZATION_SECURITY_BYTES)
 
         with open(path, "w") as fp:
             fp.write(content)
