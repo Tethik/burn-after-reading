@@ -1,4 +1,4 @@
-var module = angular.module("burn", [], function($compileProvider) {
+var module = angular.module("burn", [], function ($compileProvider) {
   $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|data):/);
 });
 
@@ -10,10 +10,10 @@ async function encrypt(password, message, options, rp) {
 }
 
 function readFile(file) {
-  return new Promise(resolve => {
-    (function(file) {
+  return new Promise((resolve) => {
+    (function (file) {
       var reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         var contents = e.target.result;
         resolve({ filename: file.name, data_url: contents });
       };
@@ -33,14 +33,14 @@ module.factory("_feedback", [
 
     scope.status = status;
     scope.reason = reason;
-  }
+  },
 ]);
 
 module.controller("CreateCtl", [
   "$scope",
   "$http",
   "_feedback",
-  function($scope, $http, _feedback) {
+  function ($scope, $http, _feedback) {
     $scope.generate_password = true;
     $scope.anonymize_ip = true;
     $scope.burn_after_reading = false;
@@ -48,31 +48,25 @@ module.controller("CreateCtl", [
     $scope.expiry = "hour";
     $scope.message = "";
 
-    $scope.maxlength =
-      (parseInt(document.getElementById("server_says_maxlength_is").value) *
-        3) /
-      4;
+    $scope.maxlength = (parseInt(document.getElementById("server_says_maxlength_is").value) * 3) / 4;
 
-    var feedback = function(status, reason) {
+    var feedback = function (status, reason) {
       _feedback($scope, status, reason);
     };
 
-    var step3 = function(storage_key, encryption_key) {
+    var step3 = function (storage_key, encryption_key) {
       feedback("info", "Done!");
       b64 = sjcl.codec.base64url.fromBits(encryption_key);
       $scope.share_url = document.location + storage_key + "#" + b64;
       $scope.step = 3;
     };
 
-    $scope.copy = function() {
+    $scope.copy = function () {
       document.getElementById("theurlbox").select();
       if (document.execCommand("copy")) {
         feedback("info", "The message has been copied to your clipboard.");
       } else {
-        feedback(
-          "error",
-          "Could not copy the message to your keyboard, your browser may not support this feature."
-        );
+        feedback("error", "Could not copy the message to your keyboard, your browser may not support this feature.");
       }
     };
 
@@ -87,12 +81,12 @@ module.controller("CreateCtl", [
 
     // $scope.check_filesize(document.getElementById("files"));
 
-    $scope.send = async function(message) {
+    $scope.send = async function (message) {
       var files = document.getElementById("files").files;
       if ((!message || message.length == 0) && (!files || files.length == 0)) {
         return feedback("info", "Please add a message or files to submit.");
-      }     
-    
+      }
+
       feedback("info", "generating a password...");
       const password = sjcl.random.randomWords(8); // 32 bits per word. 8*32 = 256 bits.
 
@@ -110,8 +104,8 @@ module.controller("CreateCtl", [
 
       const doc = {
         message,
-        files: []
-      };      
+        files: [],
+      };
 
       const fileReads = [];
       if (files) {
@@ -121,11 +115,7 @@ module.controller("CreateCtl", [
       }
       doc.files = await Promise.all(fileReads);
 
-      const encryptedDocument = await encrypt(
-        password,
-        JSON.stringify(doc)        
-      );
-      
+      const encryptedDocument = await encrypt(password, JSON.stringify(doc));
 
       feedback("info", "sending to server...");
 
@@ -134,19 +124,19 @@ module.controller("CreateCtl", [
           expiry: expiry_time,
           anonymize_ip: $scope.anonymize_ip,
           burn_after_reading: $scope.burn_after_reading,
-          message: encryptedDocument
+          message: encryptedDocument,
         })
         .then(
-          response => {
+          (response) => {
             step3(response.data.id, password);
           },
-          response => {
+          (response) => {
             console.error(response.data.error);
             feedback("error flash", response.data.error);
           }
         );
     };
-  }
+  },
 ]);
 
 module.controller("OpenCtl", [
@@ -170,9 +160,9 @@ module.controller("OpenCtl", [
     // };
 
     var decrypt = (encrypted_content, password) => {
-      feedback("info", "Decrypting...");      
-      $scope.decrypted = JSON.parse(sjcl.decrypt(password, encrypted_content));      
-      feedback("info", "Successfully decrypted the message.");      
+      feedback("info", "Decrypting...");
+      $scope.decrypted = JSON.parse(sjcl.decrypt(password, encrypted_content));
+      feedback("info", "Successfully decrypted the message.");
       return true;
     };
 
@@ -180,10 +170,7 @@ module.controller("OpenCtl", [
       if (document.execCommand("copy")) {
         feedback("info", "The message has been copied to your clipboard.");
       } else {
-        feedback(
-          "error",
-          "Could not copy the message to your keyboard, your browser may not support this feature."
-        );
+        feedback("error", "Could not copy the message to your keyboard, your browser may not support this feature.");
       }
     };
 
@@ -194,28 +181,27 @@ module.controller("OpenCtl", [
           feedback("info", "The message was deleted.");
           $scope.burned = true;
         },
-        data => feedback("error", data)
+        (data) => feedback("error", data)
       );
     };
-    
+
     let id = decodeURIComponent(document.location.pathname);
     let password = decodeURIComponent(document.location.hash);
     id = id.substr(1, id.length - 1);
     password = password.substr(1, password.length - 1);
     password = sjcl.codec.base64url.toBits(password);
 
-    feedback("info", "Fetching message from server...")
+    feedback("info", "Fetching message from server...");
     $http.get("/api/" + id).then(
-      response => {        
-        $scope.meta = response.data;        
+      (response) => {
+        $scope.meta = response.data;
         $scope.burned = $scope.meta.burn_after_reading;
-        $scope.decrypted_succesfully = decrypt($scope.meta.content, password);        
+        $scope.decrypted_succesfully = decrypt($scope.meta.content, password);
       },
-      () => {        
+      () => {
         $scope.not_found = true;
-        feedback("","")
+        feedback("", "");
       }
     );
-  }
+  },
 ]);
-
