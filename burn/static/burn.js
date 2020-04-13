@@ -4,8 +4,8 @@ var module = angular.module("burn", [], function ($compileProvider) {
 
 var files = [];
 
-async function encrypt(password, message, options, rp) {
-  var ciphertext = sjcl.encrypt(password, message, options, rp);
+async function encrypt(password, message) {
+  var ciphertext = sjcl.encrypt(password, message);
   return ciphertext;
 }
 
