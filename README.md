@@ -5,37 +5,34 @@ crypto where the key is shared via the url hash.
 
 [Demo](https://burn.blacknode.se/)
 
-## Running locally
+## Deployment
 
-Python version: 3.6
+The service is available as a docker image that you can use. Alternatively, you can also use a wsgi-server, e.g. uwsgi.
+The easiest way is probably to use something like the following docker-compose file to run the service via docker.
 
-```
-pipenv install
-```
+```yml
+version: "3"
 
-You can either start the server locally by running
-
-```
-python run.py
-```
-
-or with gunicorn
-
-```
-gunicorn burn.wsgi
-```
-
-## Testing
-
-```bash
-py.test
+services:  
+  burn-after-reading:
+    image: docker.pkg.github.com/tethik/burn-after-reading/burn-after-reading:1.4.1
+    environment:     
+      - MAX_CONTENT_LENGTH=16777216     
+      - BURN_DATA_PATH=/opt/data/     
+      - BURN_MAX_STORAGE=1024   
+    
+    # Expose port 80
+    # ports:
+    #   - 80:80
+    
+    # Persist data
+    # volumes:
+    #   - /root/docker-services/burn-after-reading/data:/opt/data
 ```
 
 ## Configuration
 
-The application supports configuration through environment variables and dotenv (i.e. save a `.env` file in the directory you are running the server).
-
-Sample `.env` might look as follows.
+The application supports configuration through the following environment variables.
 
 ```
 BURN_DATA_PATH=./data/
@@ -47,17 +44,23 @@ MAX_CONTENT_LENGTH=16777216
 - `BURN_MAX_STORAGE` decides max how many documents the service will store. This is not related to the actual disk space used, only the actual count of messages currently stored.
 - `MAX_CONTENT_LENGTH` is the max request size, roughly how big the document is allowed to be in bytes.
 
-## Docker
+## Development
 
-There's a Dockerfile included, so the project can be run as a docker container as follows.
-Still need to figure out how to set the capacity though...
+### Running locally
+
+Set up the python virtual environment via pipenv.
 
 ```
-docker build . -t burn
-docker run -p 80:80 -it burn
+pipenv install
 ```
 
-## Testing
+From the virtual environment, you can start the server in a debug mode by running:
+
+```
+python debug.py
+```
+
+### Testing
 
 ```bash
 py.test
@@ -71,8 +74,3 @@ py.test
 - [skeleton css framework](http://getskeleton.com)
 - [flat circle-icons from elegantthemes.com](http://www.elegantthemes.com/blog/freebie-of-the-week/beautiful-flat-icon)
 - [sqllite3](https://www.sqlite.org/)
-
-## Todo
-
-See issues:
-https://github.com/Tethik/burn-after-reading/issues/
