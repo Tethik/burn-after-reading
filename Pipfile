@@ -13,6 +13,7 @@ pytest = "*"
 pytest-cov = "*"
 rope = "*"
 autopep8 = "*"
+safety = "*"
 
 [requires]
 python_version = "3.6"
