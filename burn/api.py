@@ -8,11 +8,12 @@ import os
 from burn.storage import Storage
 
 json_api = Blueprint('json_api', __name__)
-   
+
+
 @json_api.before_request
 def before_request():
     capacity = int(os.environ.get('BURN_MAX_STORAGE', 65536))
-    data_path = os.environ.get('BURN_DATA_PATH', "/dev/shm/burn/") 
+    data_path = os.environ.get('BURN_DATA_PATH', "/dev/shm/burn/")
     database_file = os.path.join(data_path, "burn.db")
     files_path = os.path.join(data_path, 'files/')
     app.storage = Storage(capacity, files_path, database_file)
@@ -31,7 +32,7 @@ def create():
     expiry = min(given_expiry, max_expiry)
 
     _id = app.storage.create(message, expiry, anonymize_ip, request.remote_addr,
-                          burn_after_reading=burn_after_reading)
+                             burn_after_reading=burn_after_reading)
 
     return jsonify({"id": _id})
 
@@ -49,7 +50,7 @@ def read(token):
     if not ret:
         return abort(404)
 
-    visitors = app.storage.list_visitors(token)    
+    visitors = app.storage.list_visitors(token)
     unique_visitors = set([v[0] for v in visitors])
 
     aliased_visitors = list()
@@ -59,13 +60,15 @@ def read(token):
             if creator:
                 alias_dictionary[identifier] = "Author"
             else:
-                alias_dictionary[identifier] = "Visitor " + str(len(alias_dictionary.keys()))
-                
-        aliased_visitors.append({"id": identifier, "alias": alias_dictionary[identifier], "time": time})
+                alias_dictionary[identifier] = "Visitor " + \
+                    str(len(alias_dictionary.keys()))
+
+        aliased_visitors.append(
+            {"id": identifier, "alias": alias_dictionary[identifier], "time": time})
 
     ret.update({
         "visitors": aliased_visitors,
         "unique_visitors": list(unique_visitors)
-    })   
+    })
 
     return jsonify(ret)

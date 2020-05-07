@@ -60,3 +60,5 @@ deploy
 .pytest_cache/
 data
 .env
+
+.vscode

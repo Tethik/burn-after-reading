@@ -2,11 +2,15 @@ import os
 import sqlite3
 import uuid
 from datetime import datetime
-import hashlib
 import shutil
 import logging
+import hmac
+import secrets
+import hashlib
 
 logger = logging.getLogger("storage")
+
+ANONYMIZATION_SECURITY_BYTES = 32  # 256 bits
 
 
 class StorageException(Exception):
@@ -16,10 +20,7 @@ class StorageException(Exception):
 
 class Storage(object):
     def __init__(self, capacity, storage_path, database_file):
-        try:
-            os.makedirs(storage_path)
-        except:
-            pass
+        os.makedirs(storage_path, exist_ok=True)
         self.storage_path = storage_path
         self.capacity = capacity
         logger.debug(f"Database stored at {database_file}")
@@ -47,12 +48,12 @@ class Storage(object):
                     ON DELETE CASCADE
             )"""
         )
-
         self.conn.commit()
 
     def _add_visited_log(self, c, key, ip, creator, salt):
         if salt != None:
-            ip = hashlib.sha256((salt + ip).encode()).hexdigest()
+            ip = hmac.new(salt, ip.encode("ascii"),
+                          digestmod=hashlib.sha256).hexdigest()
         c.execute(
             """
             INSERT INTO visitors (storage_key, ip, visited, creator)
@@ -91,13 +92,13 @@ class Storage(object):
         content = open(path).read()
 
         if burn_after_reading:
-            self.delete(key)            
+            self.delete(key)
         else:
             self._add_visited_log(c, key, ip, 0, anonymize_ip_salt)
 
         return {
             "path": path,
-            "expiry": expiry,            
+            "expiry": expiry,
             "burn_after_reading": burn_after_reading,
             "content": content,
         }
@@ -121,7 +122,7 @@ class Storage(object):
         key = str(uuid.uuid4())
         salt = None
         if anonymize_ip:
-            salt = str(uuid.uuid4())
+            salt = secrets.token_bytes(ANONYMIZATION_SECURITY_BYTES)
 
         with open(path, "w") as fp:
             fp.write(content)
@@ -142,7 +143,7 @@ class Storage(object):
         try:
             os.remove(path)
         except FileNotFoundError:
-            pass
+            logger.warn(f"Tried to remove non-existent file at {path}")
 
     def delete(self, key):
         c = self.conn.cursor()
@@ -169,13 +170,12 @@ class Storage(object):
 
     def expire(self):
         c = self.conn.cursor()
-        date = datetime.utcnow()        
+        date = datetime.utcnow()
         res = c.execute("SELECT path FROM storage WHERE expiry < ?", (date,))
-        rows = res.fetchall()        
+        rows = res.fetchall()
         logger.info(f'Expiring {len(rows)} documents from the storage')
         for row in rows:
             logger.info(f'Deleting {row[0]}')
             self._remove_file(row[0])
         c.execute("DELETE FROM storage WHERE expiry < ?", (date,))
         self.conn.commit()
-
