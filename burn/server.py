@@ -4,8 +4,6 @@ import uuid
 
 app = Flask(__name__)
 
-AES_CIPHER_SIZE = 128
-
 
 @app.route("/")
 def index():
