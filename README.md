@@ -15,7 +15,7 @@ version: "3"
 
 services:  
   burn-after-reading:
-    image: docker.pkg.github.com/tethik/burn-after-reading/burn-after-reading:1.4.1
+    image: docker.pkg.github.com/tethik/burn-after-reading/burn-after-reading:latest
     environment:     
       - MAX_CONTENT_LENGTH=16777216     
       - BURN_DATA_PATH=/opt/data/     
@@ -44,27 +44,6 @@ MAX_CONTENT_LENGTH=16777216
 - `BURN_MAX_STORAGE` decides max how many documents the service will store. This is not related to the actual disk space used, only the actual count of messages currently stored.
 - `MAX_CONTENT_LENGTH` is the max request size, roughly how big the document is allowed to be in bytes.
 
-## Development
-
-### Running locally
-
-Set up the python virtual environment via pipenv.
-
-```
-pipenv install
-```
-
-From the virtual environment, you can start the server in a debug mode by running:
-
-```
-python debug.py
-```
-
-### Testing
-
-```bash
-py.test
-```
 
 ## Tech and Credits
 
