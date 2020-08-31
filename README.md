@@ -38,11 +38,13 @@ The application supports configuration through the following environment variabl
 BURN_DATA_PATH=./data/
 BURN_MAX_STORAGE=1024
 MAX_CONTENT_LENGTH=16777216
+BURN_ALLOW_PROXY_IP=False
 ```
 
 - `BURN_DATA_PATH` decides where the service should store the data. If you want to store in memory, you can use `/dev/shm`.
 - `BURN_MAX_STORAGE` decides max how many documents the service will store. This is not related to the actual disk space used, only the actual count of messages currently stored.
 - `MAX_CONTENT_LENGTH` is the max request size, roughly how big the document is allowed to be in bytes.
+- `BURN_ALLOW_PROXY_IP` toggles whether or not to trust proxy HTTP headers rather. If the service is running behind a proxy, e.g. traefik, you may need to enable this with `BURN_ALLOW_PROXY_IP=True`.
 
 
 ## Tech and Credits

@@ -10,7 +10,7 @@ from burn.storage import Storage
 json_api = Blueprint('json_api', __name__)
 
 def remote_ip():
-    allow_proxy = os.environ.get('BURN_ALLOW_PROXY_IP', False)
+    allow_proxy = os.environ.get('BURN_ALLOW_PROXY_IP', False) == "True"
     if allow_proxy and len(request.access_route) > 0:
         ip = request.access_route[0]
     else:
