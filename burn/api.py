@@ -9,6 +9,13 @@ from burn.storage import Storage
 
 json_api = Blueprint('json_api', __name__)
 
+def remote_ip():
+    allow_proxy = os.environ.get('BURN_ALLOW_PROXY_IP', False) == "True"
+    if allow_proxy and len(request.access_route) > 0:
+        ip = request.access_route[0]
+    else:
+        ip = request.remote_addr
+    return ip
 
 @json_api.before_request
 def before_request():
@@ -22,6 +29,7 @@ def before_request():
 
 @json_api.route("/create", methods=["POST"])
 def create():
+    ip = remote_ip()
     message = request.json["message"]
     anonymize_ip = request.json["anonymize_ip"]
     burn_after_reading = request.json["burn_after_reading"]
@@ -31,7 +39,7 @@ def create():
     max_expiry = datetime.utcnow() + timedelta(seconds=max_expiry_delta)
     expiry = min(given_expiry, max_expiry)
 
-    _id = app.storage.create(message, expiry, anonymize_ip, request.remote_addr,
+    _id = app.storage.create(message, expiry, anonymize_ip, ip,
                              burn_after_reading=burn_after_reading)
 
     return jsonify({"id": _id})
@@ -45,7 +53,8 @@ def delete(token):
 
 @json_api.route("/<uuid:token>", methods=["GET"])
 def read(token):
-    ret = app.storage.get(token, request.remote_addr)
+    ip = remote_ip()
+    ret = app.storage.get(token, ip)
 
     if not ret:
         return abort(404)
