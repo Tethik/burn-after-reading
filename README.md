@@ -5,6 +5,8 @@ crypto where the key is shared via the url hash.
 
 [Demo](https://burn.blacknode.se/)
 
+ℹ️ Consider checking out [yopass](https://github.com/jhaals/yopass) that does very much the same as this project, but is more well maintained.
+
 ## Deployment
 
 The service is available as a docker image that you can use. Alternatively, you can also use a wsgi-server, e.g. uwsgi.
