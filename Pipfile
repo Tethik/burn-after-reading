@@ -16,4 +16,4 @@ autopep8 = "*"
 safety = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.10"

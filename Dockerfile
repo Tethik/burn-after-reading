@@ -1,4 +1,4 @@
-FROM tiangolo/uwsgi-nginx:python3.6
+FROM tiangolo/uwsgi-nginx:python3.10
 
 # Install requirements (dependencies). Changing the lock file will trigger updates
 RUN apt-get update & apt-get install git
