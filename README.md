@@ -15,18 +15,18 @@ The easiest way is probably to use something like the following docker-compose f
 ```yml
 version: "3"
 
-services:  
+services:
   burn-after-reading:
-    image: docker.pkg.github.com/tethik/burn-after-reading/burn-after-reading:latest
-    environment:     
-      - MAX_CONTENT_LENGTH=16777216     
-      - BURN_DATA_PATH=/opt/data/     
-      - BURN_MAX_STORAGE=1024   
-    
+    image: ghcr.io/tethik/burn-after-reading:latest
+    environment:
+      - MAX_CONTENT_LENGTH=16777216
+      - BURN_DATA_PATH=/opt/data/
+      - BURN_MAX_STORAGE=1024
+
     # Expose port 80
     # ports:
     #   - 80:80
-    
+
     # Persist data
     # volumes:
     #   - /root/docker-services/burn-after-reading/data:/opt/data
@@ -47,7 +47,6 @@ BURN_ALLOW_PROXY_IP=False
 - `BURN_MAX_STORAGE` decides max how many documents the service will store. This is not related to the actual disk space used, only the actual count of messages currently stored.
 - `MAX_CONTENT_LENGTH` is the max request size, roughly how big the document is allowed to be in bytes.
 - `BURN_ALLOW_PROXY_IP` toggles whether or not to trust proxy HTTP headers rather. If the service is running behind a proxy, e.g. traefik, you may need to enable this with `BURN_ALLOW_PROXY_IP=True`.
-
 
 ## Tech and Credits
 

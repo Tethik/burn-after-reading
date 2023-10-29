@@ -35,8 +35,4 @@ docker run -p 5000:80 --rm -it burn
 
 ## Push new docker container
 
-```sh
-VERSION=1.4.1
-docker build -t docker.pkg.github.com/tethik/burn-after-reading/burn-after-reading:$VERSION .
-docker push docker.pkg.github.com/tethik/burn-after-reading/burn-after-reading:$VERSION
-```
+Should be handled by the github workflow. Just push a new tag.
