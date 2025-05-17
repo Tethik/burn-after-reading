@@ -34,8 +34,9 @@
 
   #paper {
     margin: 0 auto;
-    max-width: 800px;
+    width: 1000px;
     padding: 20px;
+    height: 800px;
     /* background-color: #f9f9f9; */
     /* border-radius: 8px; */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -96,16 +97,37 @@ function startFire() {
 
   const ctx = canvas.getContext('2d');
   
-  const gridSize = 2; // size of each pixel in the grid
-  const evolveRate = 0.06; // rate at which the fire evolves
+  const gridSize = 3; // size of each pixel in the grid
+  const evolveRate = 0.22; // rate at which the fire evolves
   const pixels = []; // the burn values for each pixel
   const gridWidth = Math.floor(canvas.width / gridSize);
   const gridHeight = Math.floor(canvas.height / gridSize);
 
-  // -1 = not burning, 0 = ash, 1 = burning, 2 = glowing
+  
+
+  const colorProgression = [
+    // 'rgba(92, 51, 44, 1)', // smolder - brown
+    'brown',    
+    'rgba(255, 0, 0, 1)', // burning - red
+    'rgba(255, 67, 0, 1)', // glowing - orange
+    'rgba(255, 165, 0, 1)', // hot - yellow          
+  ].reverse(); // ash = -2, -1 = not burning
+
+
+  // const colorProgression = [
+  //   // 'rgba(92, 51, 44, 1)', // smolder - brown
+  //   'brown',
+  //   '#3f3f74',
+  //   '#306082',
+  //   '#5b6ee1',
+  // ]; // ash = -2, -1 = not burning
+  
+  
+  // Initialize the pixels array with -1 (not burning)
   for (let y = 0; y < gridHeight; y++) {
     const row = [];
     for (let x = 0; x < gridWidth; x++) {
+
       // Draw a grid of squares (for debugging)
       // ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
       // ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
@@ -117,19 +139,15 @@ function startFire() {
   }
 
   // Draw the fire effect
-
-
   function drawFire(updatedPixels) {
-    for (let {x, y, pixel} of updatedPixels) {
-        if (pixel === 2) {
-          ctx.fillStyle = 'rgba(255, 255, 0, 1)';                
-        } else if (pixel === 1) {
-          ctx.fillStyle = 'rgba(255, 0, 0, 1)';          
-        } else if (pixel === 0) {          
+    for (let {x, y, pixel} of updatedPixels) {                      
+        if (pixel === -2) {          
           ctx.clearRect(x * gridSize, y * gridSize, gridSize, gridSize);
           ctx.fillStyle = 'rgba(0, 0, 0, 0.80)';
         } else if (pixel === -1) {
           ctx.clearRect(x * gridSize, y * gridSize, gridSize, gridSize);          
+        } else {
+          ctx.fillStyle = colorProgression[pixel];
         }
 
         ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
@@ -138,10 +156,10 @@ function startFire() {
 
   function gp(y, x) {
     if (pixels[y] === undefined) {
-      return 0;
+      return -2;
     }
     if (pixels[y][x] === undefined) {
-      return 0;
+      return -2;
     }
     return pixels[y][x];
   }
@@ -154,82 +172,68 @@ function startFire() {
     // Update the burn values for each pixel
     const updatedPixels = [];
     
-    let s = 0;
+    // let s = 0;
     for (let y = 0; y < gridHeight; y++) {
       for (let x = 0; x < gridWidth; x++) {
         const pixel = pixels[y][x];
-        s += pixel;
+        // s += pixel;
 
-        if (pixel === 0) { // ash
+        if (pixel === -2) { // ash
           continue;
         }
-
-        const evolve = Math.random() < evolveRate; // 25% chance to evolve
-
-        if (!evolve) {    
+        
+        if (Math.random() > evolveRate) {    
           continue;
         }
+        
 
         // Are any of the surrounding pixels burning?
         const nearbyFire = 
-            gp(y - 1, x) > 0 || // above
-            gp(y + 1, x) > 0 || // below
-            gp(y, x - 1) > 0 || // left
-            gp(y, x + 1) > 0; // right
+            gp(y - 1, x) > -1 || // above
+            gp(y + 1, x) > -1 || // below
+            gp(y, x - 1) > -1 || // left
+            gp(y, x + 1) > -1; // right
 
-        const nearbyMatter = 
+        const nearbyFuel = 
             gp(y - 1, x) === -1 || // above
             gp(y + 1, x) === -1 || // below
             gp(y, x - 1) === -1 || // left
             gp(y, x + 1) === -1; // right
-
-        let updated = false;
-        if (pixel === -1 && nearbyFire) { // not burning -> glowing                     
-          pixels[y][x] = 2;
-          updated = true;                    
-        } else if (pixel === 2) { // glowing -> burning
-          pixels[y][x] = 1;
-          updated = true;
-        } else if (pixel === 1 && !nearbyMatter) { // burning -> ash 
-          pixels[y][x] = 0;
-          updated = true;
-        }
         
-
-        if (updated) {
-          updatedPixels.push({x, y, pixel: pixels[y][x]});
-        }        
+        if (pixel === -1 && nearbyFire) { // not burning -> brown                               
+          updatedPixels.push({x, y, pixel: 0});          
+        } else if (pixel > -1 && pixel < colorProgression.length - 1) {            
+          updatedPixels.push({x, y, pixel: pixels[y][x] + 1});          
+        } else if (pixel === colorProgression.length - 1 && !nearbyFuel) {
+          // burning -> ash                    
+          updatedPixels.push({x, y, pixel: -2});
+        }         
       }
     }
 
+    // Update pixels
+    updatedPixels.forEach(({x, y, pixel}) => {
+      pixels[y][x] = pixel;
+    });
+
     drawFire(updatedPixels);
-    if (s !== 0) {      
-      requestAnimationFrame(tick); // AnimationFrame happens at 60fps
-    } else {
-      console.log("no more fire", s);      
-    }    
-  }
-  
-
-  // // Create a gradient for the fire effect
-  // const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  // gradient.addColorStop(0, 'rgba(255, 255, 0, 1)');
-  // gradient.addColorStop(0.5, 'rgba(255, 165, 0, 1)');
-  // gradient.addColorStop(1, 'rgba(255, 0, 0, 1)');
-
-  // // Draw the fire effect
-  // function drawFire() {
-  //   ctx.fillStyle = gradient;
-  //   ctx.fillRect(0, canvas.height - Math.random() * canvas.height / 2, canvas.width, Math.random() * canvas.height / 2);
-  //   // requestAnimationFrame(drawFire);
-  // }
-
-  const startPixels = [{x: 0, y: 0, pixel: 1}, {x: gridWidth-1, y: gridHeight - 1, pixel: 1}];
-  for (let {x, y, pixel} of startPixels) {
-    pixels[y][x] = pixel; // start the fire at the top left corner
+    // if (s !== 0) {      
+    requestAnimationFrame(tick); // AnimationFrame happens at 60fps
+    // } else {
+    //   console.log("no more fire", s);      
+    // }    
   }  
 
+  // Kindle the fire
+  const startPixels = [
+    // {x: 0, y: 0, pixel: 0}, 
+    {x: gridWidth-1, y: gridHeight - 1, pixel: 0}
+  ];
+  for (let {x, y, pixel} of startPixels) {
+    pixels[y][x] = pixel; 
+  }  
   drawFire(startPixels);
+
   // Start the animation loop
   tick();
 }
