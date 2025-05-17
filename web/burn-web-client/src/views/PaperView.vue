@@ -95,10 +95,9 @@ function startFire() {
   canvas.style.zIndex = '1';
 
   const ctx = canvas.getContext('2d');
-
   
   const gridSize = 2; // size of each pixel in the grid
-  const evolveRate = 0.25; // rate at which the fire evolves
+  const evolveRate = 0.06; // rate at which the fire evolves
   const pixels = []; // the burn values for each pixel
   const gridWidth = Math.floor(canvas.width / gridSize);
   const gridHeight = Math.floor(canvas.height / gridSize);
@@ -120,28 +119,20 @@ function startFire() {
   // Draw the fire effect
 
 
-  function drawFire() {
-    for (let y = 0; y < gridHeight; y++) {
-      for (let x = 0; x < gridWidth; x++) {
-        const pixel = pixels[y][x];
-        // if (pixel === -1) {
-        //   continue;
-        // }
-
+  function drawFire(updatedPixels) {
+    for (let {x, y, pixel} of updatedPixels) {
         if (pixel === 2) {
-          ctx.fillStyle = 'rgba(255, 255, 0, 1)';        
+          ctx.fillStyle = 'rgba(255, 255, 0, 1)';                
         } else if (pixel === 1) {
-          ctx.fillStyle = 'rgba(255, 0, 0, 1)';
+          ctx.fillStyle = 'rgba(255, 0, 0, 1)';          
         } else if (pixel === 0) {          
           ctx.clearRect(x * gridSize, y * gridSize, gridSize, gridSize);
           ctx.fillStyle = 'rgba(0, 0, 0, 0.80)';
         } else if (pixel === -1) {
-          ctx.fillStyle = 'rgba(0, 0, 0, 0)';
+          ctx.clearRect(x * gridSize, y * gridSize, gridSize, gridSize);          
         }
 
         ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
-        // console.log('drawFire', pixel, x, y, gridSize, gridSize);
-      }
     }    
   }
 
@@ -157,12 +148,17 @@ function startFire() {
  
 
   function tick() {
-    // TODO: use copy of pixels to avoid modifying the original array while iterating?
+    // IDEA: use copy of pixels to avoid modifying the original array while iterating?
+    // IDEA: be smarter about which pixels to update - no need to scan the whole grid
 
     // Update the burn values for each pixel
+    const updatedPixels = [];
+    
+    let s = 0;
     for (let y = 0; y < gridHeight; y++) {
       for (let x = 0; x < gridWidth; x++) {
         const pixel = pixels[y][x];
+        s += pixel;
 
         if (pixel === 0) { // ash
           continue;
@@ -187,29 +183,31 @@ function startFire() {
             gp(y, x - 1) === -1 || // left
             gp(y, x + 1) === -1; // right
 
-
-        if (pixel === -1) { // not burning -> glowing          
-          if (nearbyFire) {            
-            pixels[y][x] = 2;
-          }          
+        let updated = false;
+        if (pixel === -1 && nearbyFire) { // not burning -> glowing                     
+          pixels[y][x] = 2;
+          updated = true;                    
         } else if (pixel === 2) { // glowing -> burning
           pixels[y][x] = 1;
+          updated = true;
         } else if (pixel === 1 && !nearbyMatter) { // burning -> ash 
           pixels[y][x] = 0;
+          updated = true;
         }
+        
+
+        if (updated) {
+          updatedPixels.push({x, y, pixel: pixels[y][x]});
+        }        
       }
     }
 
-    // console.log(pixels);
-    // let s = 0;
-    // for (let y = 0; y < gridHeight; y++) {
-    //   for (let x = 0; x < gridWidth; x++) {
-    //     s += pixels[y][x];
-    //   }
-    // }
-    // console.log(s);
-    drawFire();
-    requestAnimationFrame(tick);
+    drawFire(updatedPixels);
+    if (s !== 0) {      
+      requestAnimationFrame(tick); // AnimationFrame happens at 60fps
+    } else {
+      console.log("no more fire", s);      
+    }    
   }
   
 
@@ -226,8 +224,13 @@ function startFire() {
   //   // requestAnimationFrame(drawFire);
   // }
 
-  pixels[0][0] = 1; // start the fire at the top left corner
+  const startPixels = [{x: 0, y: 0, pixel: 1}, {x: gridWidth-1, y: gridHeight - 1, pixel: 1}];
+  for (let {x, y, pixel} of startPixels) {
+    pixels[y][x] = pixel; // start the fire at the top left corner
+  }  
 
+  drawFire(startPixels);
+  // Start the animation loop
   tick();
 }
 
