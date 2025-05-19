@@ -1,18 +1,14 @@
 <template>
   <div class="about">
-
     <div id="paper">
-      <h2>Paper</h2>
+      <h2 id="title">Paper</h2>
       <p>Paper is a digital asset that can be used to represent various types of information.</p>
       <p>It can be used to create and manage digital assets, such as documents, images, and videos.</p>
       <p>Paper can also be used to create and manage digital identities, such as user profiles and social media
         accounts.</p>
       <button @click="startFire">Start Fire</button>
-    </div>
-
-    <canvas id="fire-canvas" width="0" height="0"></canvas>
-
-    
+    </div>    
+    <canvas id="fire-canvas" width="0" height="0"></canvas>    
   </div>
 </template>
 
@@ -88,8 +84,9 @@ function startFire() {
   const paper = document.getElementById('paper');
 
   // Set the canvas size
-  canvas.setAttribute('width', paper.offsetWidth);
-  canvas.setAttribute('height', paper.offsetHeight);
+  const size = paper.getBoundingClientRect();
+  canvas.setAttribute('width', size.width);
+  canvas.setAttribute('height', size.height);
   canvas.style.position = 'absolute';
   canvas.style.top = paper.offsetTop + 'px';
   canvas.style.left = paper.offsetLeft + 'px';
@@ -97,17 +94,15 @@ function startFire() {
 
   const ctx = canvas.getContext('2d');
   
-  const gridSize = 3; // size of each pixel in the grid
-  const evolveRate = 0.22; // rate at which the fire evolves
+  const gridSize = 13; // size of each pixel in the grid
+  const evolveRate = 0.23; // rate at which the fire evolves
   const pixels = []; // the burn values for each pixel
-  const gridWidth = Math.floor(canvas.width / gridSize);
-  const gridHeight = Math.floor(canvas.height / gridSize);
-
-  
+  const gridWidth = Math.ceil(canvas.width / gridSize);
+  const gridHeight = Math.ceil(canvas.height / gridSize);
 
   const colorProgression = [
     // 'rgba(92, 51, 44, 1)', // smolder - brown
-    'brown',    
+    // 'brown',    
     'rgba(255, 0, 0, 1)', // burning - red
     'rgba(255, 67, 0, 1)', // glowing - orange
     'rgba(255, 165, 0, 1)', // hot - yellow          
@@ -172,11 +167,11 @@ function startFire() {
     // Update the burn values for each pixel
     const updatedPixels = [];
     
-    // let s = 0;
+    let s = 0;
     for (let y = 0; y < gridHeight; y++) {
       for (let x = 0; x < gridWidth; x++) {
         const pixel = pixels[y][x];
-        // s += pixel;
+        s += pixel;
 
         if (pixel === -2) { // ash
           continue;
@@ -217,11 +212,11 @@ function startFire() {
     });
 
     drawFire(updatedPixels);
-    // if (s !== 0) {      
-    requestAnimationFrame(tick); // AnimationFrame happens at 60fps
-    // } else {
-    //   console.log("no more fire", s);      
-    // }    
+    if (s !== -2 * gridWidth * gridHeight) { 
+      requestAnimationFrame(tick); // AnimationFrame happens at 60fps
+    } else {
+      console.log("fire done");      
+    }    
   }  
 
   // Kindle the fire
