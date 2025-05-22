@@ -1,35 +1,80 @@
-@import './base.css';
+/* @import './base.css'; */
+@import './skeleton.css';
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+/* Imported from old version */
+body {
+  background-color: #c75c5c;
+}
+
+#thebox {
+  height: 125px;
+}
+
+@keyframes flash {
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.flash {
+  animation: flash 0.5s;
+}
+
+.msg {
+  background-color: #f5cf87;
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 15px;
+  padding-left: 10px;
+}
+
+.warning {
+  background-color: #c75c5c;
+}
+
+.error {
+  background-color: #c75c5c;
+}
+
+.button-burn {
+  background-color: #c75c5c;
+  color: #f5cf87;
+}
+
+.button-create,
+.button-copy {
+  background-color: #f5cf87;
+  color: #c75c5c;
+}
+
+.button-create:hover,
+.button-copy:hover {
+  color: #c75c5c;
+}
+
+.right-align {
+  text-align: right;
+}
+
+.visitor-box {
+  margin-top: 25px;
+}
+
+.visitor-table {
+  max-height: 500px;
+  overflow: scroll;
+}
+
+.identifier-text {
+  font-size: 6pt;
+  color: grey;
 }
 
 a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+a:hover {
+  color: #c75c5c;
 }
