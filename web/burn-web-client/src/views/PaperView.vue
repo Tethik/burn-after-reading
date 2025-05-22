@@ -1,15 +1,13 @@
-<template>
-  <div class="about">
-    <div id="paper">
-      <h2 id="title">Paper</h2>
-      <p>Paper is a digital asset that can be used to represent various types of information.</p>
-      <p>It can be used to create and manage digital assets, such as documents, images, and videos.</p>
-      <p>Paper can also be used to create and manage digital identities, such as user profiles and social media
-        accounts.</p>
-      <button @click="startFire">Start Fire</button>
-    </div>    
-    <canvas id="fire-canvas" width="0" height="0"></canvas>    
-  </div>
+<template>  
+  <!-- <div id="paper"> -->
+    <h2 id="title">Paper</h2>
+    <p>Paper is a digital asset that can be used to represent various types of information.</p>
+    <p>It can be used to create and manage digital assets, such as documents, images, and videos.</p>
+    <p>Paper can also be used to create and manage digital identities, such as user profiles and social media
+      accounts.</p>
+    <button @click="startFire">Start Fire</button>
+  <!-- </div>     -->
+  <canvas id="fire-canvas" width="0" height="0"></canvas>      
 </template>
 
 <style>
@@ -27,61 +25,13 @@
     z-index: 1;
     pointer-events: none;
   }
-
-  #paper {
-    margin: 0 auto;
-    width: 1000px;
-    padding: 20px;
-    height: 800px;
-    /* background-color: #f9f9f9; */
-    /* border-radius: 8px; */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    /* background:     
-      linear-gradient(black 0 0)bottom left/ 100% 98%,   
-      linear-gradient(red 0 0)bottom left/ 100% 99%,
-      linear-gradient(orange 0 0)bottom left/ 100% 100%,
-      #ccc; */
-    background-position-y: -4500%;
-    background-repeat: no-repeat;
-  }
-
-  #paper {
-    /* animation: expand-fire 10s forwards; */
-  }
-
-  @keyframes expand-fire {
-    0% {
-      color: pink;
-      background-position-y: 180%;
-    }
-    20% {
-      color: red;
-      background-position-y: 60%;
-    }
-    40% {
-      color: yellow;
-      background-position-y: 40%;
-    }
-    60% {
-      color: orange;
-      background-position-y: 20%;
-    }
-    80% {
-      background-position-y: 20%;
-      color: white;    
-    }
-    100% {
-      background-position-y: 0%;
-      color: blue;  
-    }
-  }
 }
 </style>
 
 <script setup>
 function startFire() {
   const canvas = document.getElementById('fire-canvas');
-  const paper = document.getElementById('paper');
+  const paper = document.getElementById('content');
 
   // Set the canvas size
   const size = paper.getBoundingClientRect();

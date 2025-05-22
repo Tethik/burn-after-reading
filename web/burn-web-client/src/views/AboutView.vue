@@ -1,15 +1,42 @@
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
-  </div>
-</template>
+  <p>This service is intended to be used as a way of sharing one-time
+  messages secretly. For example passwords and other sensitive data. I needed such
+  a service when resetting my Mom's email password. The optimal way would have
+  been to send the password using <a target="_blank" href="https://en.wikipedia.org/wiki/Pretty_Good_Privacy">PGP</a>,
+  but good luck getting a non-IT person using that. PGP is just too complicated
+  for the average user.</p>
 
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>
+  <p><b>Please note that this is mostly a proof of concept!</b></p>
+
+  <h4>Basic Idea</h4>
+
+  <p>Clientside cryptography where the encryption key is sent in the url hash.
+  Expiry times to make the message somewhat ephemereal. Stored in memory to prevent
+  offline tampering.</p>
+
+  <p>
+  It works by encrypting the message in javascript using symmetric encryption. 
+  For this I use <a target="_blank" href="https://bitwiseshiftleft.github.io/sjcl/">SJCL</a>.
+  The message is then stored in memory on the server which creates a uuid as a reference. 
+  The client side script creates a special url for you where the key is stored in the anchor part, 
+  which is by default not <a target="_blank" href="https://joakim.uddholm.com/url-secrets">sent to the server by the browser</a>. So the server never sees the encryption key.
+  </p>
+
+  <label for="example">Example url:</label>
+  <input type="text" name="example" value="http://domain.tld/[uuid]#encryptionkey" class="u-full-width" readonly/>
+
+  <p>
+  Upon receieving the request, the server returns the data referenced by the uuid.
+  The javascript takes the data and decrypts it using the encryptionkey taken from
+  the anchor.
+  </p>
+
+  <h4>Why should I trust this?</h4>
+
+  <p>You shouldn't. I'd rather you hosted your own instance for your company,
+  family, or friends. I think the only way of providing any real security with
+  clientside crypto is to have it open to review. Anything else is snakeoil. </p>
+
+  <p>All of the code is opensource and available on <a target="_blank" href="https://github.com/Tethik/burn-after-reading">github</a>.
+  You are free to reuse as you wish under the MIT license. </p>
+</template>
