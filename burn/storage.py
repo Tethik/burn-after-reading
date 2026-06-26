@@ -1,8 +1,7 @@
 import os
 import sqlite3
 import uuid
-from datetime import datetime
-import shutil
+import datetime
 import logging
 import hmac
 import secrets
@@ -58,7 +57,7 @@ class Storage(object):
             """
             INSERT INTO visitors (storage_key, ip, visited, creator)
             VALUES (?, ?, ?, ?)""",
-            (str(key), ip, datetime.utcnow(), creator),
+            (str(key), ip, datetime.datetime.now(datetime.UTC), creator),
         )
         self.conn.commit()
 
@@ -132,7 +131,7 @@ class Storage(object):
             INSERT INTO storage (key, path, expiry, created, anonymize_ip_salt, burn_after_reading)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (key, path, expiry, datetime.utcnow(), salt, burn_after_reading),
+            (key, path, expiry, datetime.datetime.now(datetime.UTC), salt, burn_after_reading),
         )
 
         self._add_visited_log(c, key, ip, True, salt)
@@ -170,7 +169,7 @@ class Storage(object):
 
     def expire(self):
         c = self.conn.cursor()
-        date = datetime.utcnow()
+        date = datetime.datetime.now(datetime.UTC)
         res = c.execute("SELECT path FROM storage WHERE expiry < ?", (date,))
         rows = res.fetchall()
         logger.info(f'Expiring {len(rows)} documents from the storage')
@@ -179,3 +178,35 @@ class Storage(object):
             self._remove_file(row[0])
         c.execute("DELETE FROM storage WHERE expiry < ?", (date,))
         self.conn.commit()
+
+def adapt_date_iso(val):
+    """Adapt datetime.date to ISO 8601 date."""
+    return val.isoformat()
+
+def adapt_datetime_iso(val):
+    """Adapt datetime.datetime to timezone-naive ISO 8601 date."""
+    return val.replace(tzinfo=None).isoformat()
+
+def adapt_datetime_epoch(val):
+    """Adapt datetime.datetime to Unix timestamp."""
+    return int(val.timestamp())
+
+sqlite3.register_adapter(datetime.date, adapt_date_iso)
+sqlite3.register_adapter(datetime.datetime, adapt_datetime_iso)
+sqlite3.register_adapter(datetime.datetime, adapt_datetime_epoch)
+
+def convert_date(val):
+    """Convert ISO 8601 date to datetime.date object."""
+    return datetime.date.fromisoformat(val.decode())
+
+def convert_datetime(val):
+    """Convert ISO 8601 datetime to datetime.datetime object."""
+    return datetime.datetime.fromisoformat(val.decode())
+
+def convert_timestamp(val):
+    """Convert Unix epoch timestamp to datetime.datetime object."""
+    return datetime.datetime.fromtimestamp(int(val))
+
+sqlite3.register_converter("date", convert_date)
+sqlite3.register_converter("datetime", convert_datetime)
+sqlite3.register_converter("timestamp", convert_timestamp)

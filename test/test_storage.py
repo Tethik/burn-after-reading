@@ -70,7 +70,7 @@ class TestStorage(TestCase):
     def test_expiry(self):
         store = Storage(3, self.file_path, self.db_location)
         store.clear()
-        now = datetime.datetime.utcnow() + datetime.timedelta(0, 3)
+        now = datetime.datetime.now() + datetime.timedelta(0, 3)
         _id = store.create("secret message", now, False, "127.0.0.1")        
         self.assertEqual(store.size(), 1)
         for _ in range(100):
@@ -116,7 +116,7 @@ class TestStorage(TestCase):
     def test_visitor_log_delete(self):
         store = Storage(3, self.file_path, self.db_location)
         store.clear()
-        key = store.create("secret message", datetime.datetime.utcnow() + datetime.timedelta(0, 3),
+        key = store.create("secret message", datetime.datetime.now() + datetime.timedelta(0, 3),
                         False, "127.0.0.1")
         visitors = store.list_visitors(key)
         self.assertEqual(visitors[0][0], "127.0.0.1")
