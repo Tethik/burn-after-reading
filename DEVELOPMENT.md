@@ -2,22 +2,22 @@
 
 ### Running locally
 
-Set up the python virtual environment via pipenv.
+Set up the python virtual environment via uv.
 
 ```
-pipenv install
+uv sync
 ```
 
 From the virtual environment, you can start the server in a debug mode by running:
 
 ```
-python debug.py
+uv run debug.py
 ```
 
 ## Run tests
 
 ```
-pytest
+uv run pytest
 ```
 
 ## Check for published security vulnerabilities

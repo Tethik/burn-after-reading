@@ -1,0 +1,26 @@
+[project]
+name = "burn-after-reading"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flask",
+    "python-dotenv",
+]
+
+[dependency-groups]
+# Production-only: the WSGI server. Not needed for local dev or tests, so it
+# lives outside the default groups and is installed explicitly in the Docker
+# build.
+prod = [
+    "gunicorn",
+]
+dev = [
+    "pylint",
+    "pytest",
+    "pytest-cov",
+    "rope",
+    "autopep8",
+    "safety",
+]
