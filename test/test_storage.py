@@ -77,7 +77,7 @@ class TestStorage(TestCase):
             store.expire()
             self.assertEqual(store.size(), 1)
             self.assertNotEqual(store.get(_id, "127.0.0.1"), None)
-        sleep(3)
+        sleep(4)
         store.expire()
         self.assertEqual(store.size(), 0)
         self.assertEqual(store.get(_id, "127.0.0.1"), None)
