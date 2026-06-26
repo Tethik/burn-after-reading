@@ -20,12 +20,6 @@ uv run debug.py
 uv run pytest
 ```
 
-## Check for published security vulnerabilities
-
-```
-safety check
-```
-
 ## Test docker
 
 ```sh

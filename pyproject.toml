@@ -22,5 +22,4 @@ dev = [
     "pytest-cov",
     "rope",
     "autopep8",
-    "safety",
 ]
