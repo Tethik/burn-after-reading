@@ -1,7 +1,5 @@
-from datetime import datetime, timedelta
-import math
-import logging
-from flask import Flask, render_template, request, abort, send_from_directory, jsonify, Blueprint, Response
+import datetime
+from flask import request, abort, jsonify, Blueprint
 from flask import current_app as app
 import os
 
@@ -35,8 +33,8 @@ def create():
     burn_after_reading = request.json["burn_after_reading"]
 
     max_expiry_delta = os.environ.get('BURN_MAX_EXPIRY_TIME', 60*60*24*7)
-    given_expiry = datetime.utcfromtimestamp(request.json["expiry"] / 1000)
-    max_expiry = datetime.utcnow() + timedelta(seconds=max_expiry_delta)
+    given_expiry = datetime.datetime.fromtimestamp(request.json["expiry"] / 1000, tz=datetime.timezone.utc)
+    max_expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(seconds=max_expiry_delta)
     expiry = min(given_expiry, max_expiry)
 
     _id = app.storage.create(message, expiry, anonymize_ip, ip,
@@ -55,6 +53,7 @@ def delete(token):
 def read(token):
     ip = remote_ip()
     ret = app.storage.get(token, ip)
+    ret["expiry"] = datetime.datetime.fromtimestamp(ret["expiry"], tz=datetime.timezone.utc)
 
     if not ret:
         return abort(404)
@@ -73,7 +72,7 @@ def read(token):
                     str(len(alias_dictionary.keys()))
 
         aliased_visitors.append(
-            {"id": identifier, "alias": alias_dictionary[identifier], "time": time})
+            {"id": identifier, "alias": alias_dictionary[identifier], "time":  datetime.datetime.fromtimestamp(time, tz=datetime.timezone.utc)})
 
     ret.update({
         "visitors": aliased_visitors,

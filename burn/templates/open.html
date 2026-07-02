@@ -46,8 +46,7 @@
     <div ng-hide="burned">
       Once you've read the message, press "burn" to delete it from the server.
       It will expire automatically
-      <time datetime="{{ meta.expiry }}">{{ meta.expiry }}</time
-      >.
+      <time datetime="{{ meta.expiry }}">{{ meta.expiry | localDate }}</time>.
     </div>
     <div class="u-cf"></div>
   </div>
@@ -84,7 +83,7 @@
             </div>
           </td>
           <td>
-            <time datetime="{{ v.time }}">{{ v.time }}</time>
+            <time datetime="{{ v.time }}">{{ v.time | localDate }}</time>
           </td>
         </tr>
       </tbody>

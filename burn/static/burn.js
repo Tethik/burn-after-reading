@@ -2,6 +2,16 @@ var module = angular.module("burn", [], function ($compileProvider) {
   $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|data):/);
 });
 
+module.filter('localDate', function () {
+  return function (input) {
+    if (!input) return '';
+    const date = new Date(input);
+    const offset = date.getTimezoneOffset() * 60000; // Convert minutes to milliseconds
+    const localDate = new Date(date.getTime() - offset);
+    return localDate.toISOString().replace('Z', '');
+  }
+})
+
 var files = [];
 
 async function encrypt(password, message) {
@@ -147,17 +157,6 @@ module.controller("OpenCtl", [
     var feedback = (status, reason) => {
       _feedback($scope, status, reason);
     };
-
-    // var convertDate = (datestring) => {
-    //   var date = new Date(datestring);
-    //   var newDate = new Date(
-    //     date.getTime() + date.getTimezoneOffset() * 60 * 1000
-    //   );
-    //   var offset = date.getTimezoneOffset() / 60;
-    //   var hours = date.getHours();
-    //   newDate.setHours(hours - offset);
-    //   return newDate;
-    // };
 
     var decrypt = (encrypted_content, password) => {
       feedback("info", "Decrypting...");
