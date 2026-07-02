@@ -5,7 +5,7 @@
 Set up the python virtual environment via uv.
 
 ```sh
-uv sync
+uv sync --all-extras
 ```
 
 From the virtual environment, you can start the server in a debug mode by running:
